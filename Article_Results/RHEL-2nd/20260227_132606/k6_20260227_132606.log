@@ -1,0 +1,1708 @@
+=== BenchTest k6 Runner ===
+BASE_URL:   http://10.10.1.5:5000
+Script:     main-exhaustion.js
+
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /opt/k6/main-exhaustion.js
+        output: -
+
+     scenarios: (100.00%) 3 scenarios, 2500 max VUs, 5m50s max duration (incl. graceful stop):
+              * browse_balance: Up to 1500 looping VUs for 5m20s over 3 stages (gracefulRampDown: 30s, exec: browseBalance, gracefulStop: 30s)
+              * commit_transfer: Up to 550 looping VUs for 5m20s over 3 stages (gracefulRampDown: 30s, exec: commitTransfer, gracefulStop: 30s)
+              * idempotency_replay: Up to 450 looping VUs for 5m20s over 3 stages (gracefulRampDown: 30s, exec: idempotencyReplay, gracefulStop: 30s)
+
+
+running (0m00.6s), 0159/2500 VUs, 1 complete and 0 interrupted iterations
+browse_balance       [   0% ] 0096/1500 VUs  0m00.6s/5m20.0s
+commit_transfer      [   0% ] 034/550 VUs    0m00.6s/5m20.0s
+idempotency_replay   [   0% ] 029/450 VUs    0m00.6s/5m20.0s
+
+running (0m01.6s), 0409/2500 VUs, 24 complete and 0 interrupted iterations
+browse_balance       [   1% ] 0246/1500 VUs  0m01.6s/5m20.0s
+commit_transfer      [   1% ] 089/550 VUs    0m01.6s/5m20.0s
+idempotency_replay   [   1% ] 074/450 VUs    0m01.6s/5m20.0s
+
+running (0m02.6s), 0659/2500 VUs, 160 complete and 0 interrupted iterations
+browse_balance       [   1% ] 0396/1500 VUs  0m02.6s/5m20.0s
+commit_transfer      [   1% ] 144/550 VUs    0m02.6s/5m20.0s
+idempotency_replay   [   1% ] 119/450 VUs    0m02.6s/5m20.0s
+
+running (0m03.6s), 0909/2500 VUs, 417 complete and 0 interrupted iterations
+browse_balance       [   1% ] 0546/1500 VUs  0m03.6s/5m20.0s
+commit_transfer      [   1% ] 199/550 VUs    0m03.6s/5m20.0s
+idempotency_replay   [   1% ] 164/450 VUs    0m03.6s/5m20.0s
+
+running (0m04.6s), 1159/2500 VUs, 826 complete and 0 interrupted iterations
+browse_balance       [   1% ] 0696/1500 VUs  0m04.6s/5m20.0s
+commit_transfer      [   1% ] 254/550 VUs    0m04.6s/5m20.0s
+idempotency_replay   [   1% ] 209/450 VUs    0m04.6s/5m20.0s
+
+running (0m05.6s), 1409/2500 VUs, 1323 complete and 0 interrupted iterations
+browse_balance       [   2% ] 0846/1500 VUs  0m05.6s/5m20.0s
+commit_transfer      [   2% ] 309/550 VUs    0m05.6s/5m20.0s
+idempotency_replay   [   2% ] 254/450 VUs    0m05.6s/5m20.0s
+
+running (0m06.6s), 1659/2500 VUs, 1953 complete and 0 interrupted iterations
+browse_balance       [   2% ] 0996/1500 VUs  0m06.6s/5m20.0s
+commit_transfer      [   2% ] 364/550 VUs    0m06.6s/5m20.0s
+idempotency_replay   [   2% ] 299/450 VUs    0m06.6s/5m20.0s
+
+running (0m07.6s), 1909/2500 VUs, 2682 complete and 0 interrupted iterations
+browse_balance       [   2% ] 1146/1500 VUs  0m07.6s/5m20.0s
+commit_transfer      [   2% ] 419/550 VUs    0m07.6s/5m20.0s
+idempotency_replay   [   2% ] 344/450 VUs    0m07.6s/5m20.0s
+
+running (0m08.6s), 2159/2500 VUs, 3539 complete and 0 interrupted iterations
+browse_balance       [   3% ] 1296/1500 VUs  0m08.6s/5m20.0s
+commit_transfer      [   3% ] 474/550 VUs    0m08.6s/5m20.0s
+idempotency_replay   [   3% ] 389/450 VUs    0m08.6s/5m20.0s
+
+running (0m09.6s), 2409/2500 VUs, 4524 complete and 0 interrupted iterations
+browse_balance       [   3% ] 1446/1500 VUs  0m09.6s/5m20.0s
+commit_transfer      [   3% ] 529/550 VUs    0m09.6s/5m20.0s
+idempotency_replay   [   3% ] 434/450 VUs    0m09.6s/5m20.0s
+
+running (0m10.6s), 2500/2500 VUs, 5623 complete and 0 interrupted iterations
+browse_balance       [   3% ] 1500/1500 VUs  0m10.6s/5m20.0s
+commit_transfer      [   3% ] 550/550 VUs    0m10.6s/5m20.0s
+idempotency_replay   [   3% ] 450/450 VUs    0m10.6s/5m20.0s
+
+running (0m11.6s), 2500/2500 VUs, 6797 complete and 0 interrupted iterations
+browse_balance       [   4% ] 1500/1500 VUs  0m11.6s/5m20.0s
+commit_transfer      [   4% ] 550/550 VUs    0m11.6s/5m20.0s
+idempotency_replay   [   4% ] 450/450 VUs    0m11.6s/5m20.0s
+
+running (0m12.6s), 2500/2500 VUs, 7989 complete and 0 interrupted iterations
+browse_balance       [   4% ] 1500/1500 VUs  0m12.6s/5m20.0s
+commit_transfer      [   4% ] 550/550 VUs    0m12.6s/5m20.0s
+idempotency_replay   [   4% ] 450/450 VUs    0m12.6s/5m20.0s
+
+running (0m13.6s), 2500/2500 VUs, 9167 complete and 0 interrupted iterations
+browse_balance       [   4% ] 1500/1500 VUs  0m13.6s/5m20.0s
+commit_transfer      [   4% ] 550/550 VUs    0m13.6s/5m20.0s
+idempotency_replay   [   4% ] 450/450 VUs    0m13.6s/5m20.0s
+
+running (0m14.6s), 2500/2500 VUs, 10355 complete and 0 interrupted iterations
+browse_balance       [   5% ] 1500/1500 VUs  0m14.6s/5m20.0s
+commit_transfer      [   5% ] 550/550 VUs    0m14.6s/5m20.0s
+idempotency_replay   [   5% ] 450/450 VUs    0m14.6s/5m20.0s
+
+running (0m15.6s), 2500/2500 VUs, 11455 complete and 0 interrupted iterations
+browse_balance       [   5% ] 1500/1500 VUs  0m15.6s/5m20.0s
+commit_transfer      [   5% ] 550/550 VUs    0m15.6s/5m20.0s
+idempotency_replay   [   5% ] 450/450 VUs    0m15.6s/5m20.0s
+
+running (0m16.6s), 2500/2500 VUs, 12352 complete and 0 interrupted iterations
+browse_balance       [   5% ] 1500/1500 VUs  0m16.6s/5m20.0s
+commit_transfer      [   5% ] 550/550 VUs    0m16.6s/5m20.0s
+idempotency_replay   [   5% ] 450/450 VUs    0m16.6s/5m20.0s
+
+running (0m17.6s), 2500/2500 VUs, 13172 complete and 0 interrupted iterations
+browse_balance       [   6% ] 1500/1500 VUs  0m17.6s/5m20.0s
+commit_transfer      [   6% ] 550/550 VUs    0m17.6s/5m20.0s
+idempotency_replay   [   6% ] 450/450 VUs    0m17.6s/5m20.0s
+
+running (0m18.6s), 2500/2500 VUs, 13989 complete and 0 interrupted iterations
+browse_balance       [   6% ] 1500/1500 VUs  0m18.6s/5m20.0s
+commit_transfer      [   6% ] 550/550 VUs    0m18.6s/5m20.0s
+idempotency_replay   [   6% ] 450/450 VUs    0m18.6s/5m20.0s
+
+running (0m19.6s), 2500/2500 VUs, 14808 complete and 0 interrupted iterations
+browse_balance       [   6% ] 1500/1500 VUs  0m19.6s/5m20.0s
+commit_transfer      [   6% ] 550/550 VUs    0m19.6s/5m20.0s
+idempotency_replay   [   6% ] 450/450 VUs    0m19.6s/5m20.0s
+
+running (0m20.6s), 2500/2500 VUs, 15560 complete and 0 interrupted iterations
+browse_balance       [   6% ] 1500/1500 VUs  0m20.6s/5m20.0s
+commit_transfer      [   6% ] 550/550 VUs    0m20.6s/5m20.0s
+idempotency_replay   [   6% ] 450/450 VUs    0m20.6s/5m20.0s
+
+running (0m21.6s), 2500/2500 VUs, 16340 complete and 0 interrupted iterations
+browse_balance       [   7% ] 1500/1500 VUs  0m21.6s/5m20.0s
+commit_transfer      [   7% ] 550/550 VUs    0m21.6s/5m20.0s
+idempotency_replay   [   7% ] 450/450 VUs    0m21.6s/5m20.0s
+
+running (0m22.6s), 2500/2500 VUs, 17097 complete and 0 interrupted iterations
+browse_balance       [   7% ] 1500/1500 VUs  0m22.6s/5m20.0s
+commit_transfer      [   7% ] 550/550 VUs    0m22.6s/5m20.0s
+idempotency_replay   [   7% ] 450/450 VUs    0m22.6s/5m20.0s
+
+running (0m23.6s), 2500/2500 VUs, 17809 complete and 0 interrupted iterations
+browse_balance       [   7% ] 1500/1500 VUs  0m23.6s/5m20.0s
+commit_transfer      [   7% ] 550/550 VUs    0m23.6s/5m20.0s
+idempotency_replay   [   7% ] 450/450 VUs    0m23.6s/5m20.0s
+
+running (0m24.6s), 2500/2500 VUs, 18470 complete and 0 interrupted iterations
+browse_balance       [   8% ] 1500/1500 VUs  0m24.6s/5m20.0s
+commit_transfer      [   8% ] 550/550 VUs    0m24.6s/5m20.0s
+idempotency_replay   [   8% ] 450/450 VUs    0m24.6s/5m20.0s
+
+running (0m25.6s), 2500/2500 VUs, 19206 complete and 0 interrupted iterations
+browse_balance       [   8% ] 1500/1500 VUs  0m25.6s/5m20.0s
+commit_transfer      [   8% ] 550/550 VUs    0m25.6s/5m20.0s
+idempotency_replay   [   8% ] 450/450 VUs    0m25.6s/5m20.0s
+
+running (0m26.6s), 2500/2500 VUs, 19941 complete and 0 interrupted iterations
+browse_balance       [   8% ] 1500/1500 VUs  0m26.6s/5m20.0s
+commit_transfer      [   8% ] 550/550 VUs    0m26.6s/5m20.0s
+idempotency_replay   [   8% ] 450/450 VUs    0m26.6s/5m20.0s
+
+running (0m27.6s), 2500/2500 VUs, 20666 complete and 0 interrupted iterations
+browse_balance       [   9% ] 1500/1500 VUs  0m27.6s/5m20.0s
+commit_transfer      [   9% ] 550/550 VUs    0m27.6s/5m20.0s
+idempotency_replay   [   9% ] 450/450 VUs    0m27.6s/5m20.0s
+
+running (0m28.6s), 2500/2500 VUs, 21366 complete and 0 interrupted iterations
+browse_balance       [   9% ] 1500/1500 VUs  0m28.6s/5m20.0s
+commit_transfer      [   9% ] 550/550 VUs    0m28.6s/5m20.0s
+idempotency_replay   [   9% ] 450/450 VUs    0m28.6s/5m20.0s
+
+running (0m29.6s), 2500/2500 VUs, 22086 complete and 0 interrupted iterations
+browse_balance       [   9% ] 1500/1500 VUs  0m29.6s/5m20.0s
+commit_transfer      [   9% ] 550/550 VUs    0m29.6s/5m20.0s
+idempotency_replay   [   9% ] 450/450 VUs    0m29.6s/5m20.0s
+
+running (0m30.6s), 2500/2500 VUs, 22877 complete and 0 interrupted iterations
+browse_balance       [  10% ] 1500/1500 VUs  0m30.6s/5m20.0s
+commit_transfer      [  10% ] 550/550 VUs    0m30.6s/5m20.0s
+idempotency_replay   [  10% ] 450/450 VUs    0m30.6s/5m20.0s
+
+running (0m31.6s), 2500/2500 VUs, 23659 complete and 0 interrupted iterations
+browse_balance       [  10% ] 1500/1500 VUs  0m31.6s/5m20.0s
+commit_transfer      [  10% ] 550/550 VUs    0m31.6s/5m20.0s
+idempotency_replay   [  10% ] 450/450 VUs    0m31.6s/5m20.0s
+
+running (0m32.6s), 2500/2500 VUs, 24421 complete and 0 interrupted iterations
+browse_balance       [  10% ] 1500/1500 VUs  0m32.6s/5m20.0s
+commit_transfer      [  10% ] 550/550 VUs    0m32.6s/5m20.0s
+idempotency_replay   [  10% ] 450/450 VUs    0m32.6s/5m20.0s
+
+running (0m33.6s), 2500/2500 VUs, 25193 complete and 0 interrupted iterations
+browse_balance       [  11% ] 1500/1500 VUs  0m33.6s/5m20.0s
+commit_transfer      [  11% ] 550/550 VUs    0m33.6s/5m20.0s
+idempotency_replay   [  11% ] 450/450 VUs    0m33.6s/5m20.0s
+
+running (0m34.6s), 2500/2500 VUs, 25983 complete and 0 interrupted iterations
+browse_balance       [  11% ] 1500/1500 VUs  0m34.6s/5m20.0s
+commit_transfer      [  11% ] 550/550 VUs    0m34.6s/5m20.0s
+idempotency_replay   [  11% ] 450/450 VUs    0m34.6s/5m20.0s
+
+running (0m35.6s), 2500/2500 VUs, 26767 complete and 0 interrupted iterations
+browse_balance       [  11% ] 1500/1500 VUs  0m35.6s/5m20.0s
+commit_transfer      [  11% ] 550/550 VUs    0m35.6s/5m20.0s
+idempotency_replay   [  11% ] 450/450 VUs    0m35.6s/5m20.0s
+
+running (0m36.6s), 2500/2500 VUs, 27550 complete and 0 interrupted iterations
+browse_balance       [  11% ] 1500/1500 VUs  0m36.6s/5m20.0s
+commit_transfer      [  11% ] 550/550 VUs    0m36.6s/5m20.0s
+idempotency_replay   [  11% ] 450/450 VUs    0m36.6s/5m20.0s
+
+running (0m37.6s), 2500/2500 VUs, 28357 complete and 0 interrupted iterations
+browse_balance       [  12% ] 1500/1500 VUs  0m37.6s/5m20.0s
+commit_transfer      [  12% ] 550/550 VUs    0m37.6s/5m20.0s
+idempotency_replay   [  12% ] 450/450 VUs    0m37.6s/5m20.0s
+
+running (0m38.6s), 2500/2500 VUs, 29166 complete and 0 interrupted iterations
+browse_balance       [  12% ] 1500/1500 VUs  0m38.6s/5m20.0s
+commit_transfer      [  12% ] 550/550 VUs    0m38.6s/5m20.0s
+idempotency_replay   [  12% ] 450/450 VUs    0m38.6s/5m20.0s
+
+running (0m39.6s), 2500/2500 VUs, 29987 complete and 0 interrupted iterations
+browse_balance       [  12% ] 1500/1500 VUs  0m39.6s/5m20.0s
+commit_transfer      [  12% ] 550/550 VUs    0m39.6s/5m20.0s
+idempotency_replay   [  12% ] 450/450 VUs    0m39.6s/5m20.0s
+
+running (0m40.6s), 2500/2500 VUs, 30827 complete and 0 interrupted iterations
+browse_balance       [  13% ] 1500/1500 VUs  0m40.6s/5m20.0s
+commit_transfer      [  13% ] 550/550 VUs    0m40.6s/5m20.0s
+idempotency_replay   [  13% ] 450/450 VUs    0m40.6s/5m20.0s
+
+running (0m41.6s), 2500/2500 VUs, 31785 complete and 0 interrupted iterations
+browse_balance       [  13% ] 1500/1500 VUs  0m41.6s/5m20.0s
+commit_transfer      [  13% ] 550/550 VUs    0m41.6s/5m20.0s
+idempotency_replay   [  13% ] 450/450 VUs    0m41.6s/5m20.0s
+
+running (0m42.6s), 2500/2500 VUs, 32752 complete and 0 interrupted iterations
+browse_balance       [  13% ] 1500/1500 VUs  0m42.6s/5m20.0s
+commit_transfer      [  13% ] 550/550 VUs    0m42.6s/5m20.0s
+idempotency_replay   [  13% ] 450/450 VUs    0m42.6s/5m20.0s
+
+running (0m43.6s), 2500/2500 VUs, 33658 complete and 0 interrupted iterations
+browse_balance       [  14% ] 1500/1500 VUs  0m43.6s/5m20.0s
+commit_transfer      [  14% ] 550/550 VUs    0m43.6s/5m20.0s
+idempotency_replay   [  14% ] 450/450 VUs    0m43.6s/5m20.0s
+
+running (0m44.6s), 2500/2500 VUs, 34592 complete and 0 interrupted iterations
+browse_balance       [  14% ] 1500/1500 VUs  0m44.6s/5m20.0s
+commit_transfer      [  14% ] 550/550 VUs    0m44.6s/5m20.0s
+idempotency_replay   [  14% ] 450/450 VUs    0m44.6s/5m20.0s
+
+running (0m45.6s), 2500/2500 VUs, 35516 complete and 0 interrupted iterations
+browse_balance       [  14% ] 1500/1500 VUs  0m45.6s/5m20.0s
+commit_transfer      [  14% ] 550/550 VUs    0m45.6s/5m20.0s
+idempotency_replay   [  14% ] 450/450 VUs    0m45.6s/5m20.0s
+
+running (0m46.6s), 2500/2500 VUs, 36460 complete and 0 interrupted iterations
+browse_balance       [  15% ] 1500/1500 VUs  0m46.6s/5m20.0s
+commit_transfer      [  15% ] 550/550 VUs    0m46.6s/5m20.0s
+idempotency_replay   [  15% ] 450/450 VUs    0m46.6s/5m20.0s
+
+running (0m47.6s), 2500/2500 VUs, 37355 complete and 0 interrupted iterations
+browse_balance       [  15% ] 1500/1500 VUs  0m47.6s/5m20.0s
+commit_transfer      [  15% ] 550/550 VUs    0m47.6s/5m20.0s
+idempotency_replay   [  15% ] 450/450 VUs    0m47.6s/5m20.0s
+
+running (0m48.6s), 2500/2500 VUs, 38274 complete and 0 interrupted iterations
+browse_balance       [  15% ] 1500/1500 VUs  0m48.6s/5m20.0s
+commit_transfer      [  15% ] 550/550 VUs    0m48.6s/5m20.0s
+idempotency_replay   [  15% ] 450/450 VUs    0m48.6s/5m20.0s
+
+running (0m49.6s), 2500/2500 VUs, 39177 complete and 0 interrupted iterations
+browse_balance       [  16% ] 1500/1500 VUs  0m49.6s/5m20.0s
+commit_transfer      [  16% ] 550/550 VUs    0m49.6s/5m20.0s
+idempotency_replay   [  16% ] 450/450 VUs    0m49.6s/5m20.0s
+
+running (0m50.6s), 2500/2500 VUs, 40069 complete and 0 interrupted iterations
+browse_balance       [  16% ] 1500/1500 VUs  0m50.6s/5m20.0s
+commit_transfer      [  16% ] 550/550 VUs    0m50.6s/5m20.0s
+idempotency_replay   [  16% ] 450/450 VUs    0m50.6s/5m20.0s
+
+running (0m51.6s), 2500/2500 VUs, 40970 complete and 0 interrupted iterations
+browse_balance       [  16% ] 1500/1500 VUs  0m51.6s/5m20.0s
+commit_transfer      [  16% ] 550/550 VUs    0m51.6s/5m20.0s
+idempotency_replay   [  16% ] 450/450 VUs    0m51.6s/5m20.0s
+
+running (0m52.6s), 2500/2500 VUs, 41862 complete and 0 interrupted iterations
+browse_balance       [  16% ] 1500/1500 VUs  0m52.6s/5m20.0s
+commit_transfer      [  16% ] 550/550 VUs    0m52.6s/5m20.0s
+idempotency_replay   [  16% ] 450/450 VUs    0m52.6s/5m20.0s
+
+running (0m53.6s), 2500/2500 VUs, 42771 complete and 0 interrupted iterations
+browse_balance       [  17% ] 1500/1500 VUs  0m53.6s/5m20.0s
+commit_transfer      [  17% ] 550/550 VUs    0m53.6s/5m20.0s
+idempotency_replay   [  17% ] 450/450 VUs    0m53.6s/5m20.0s
+
+running (0m54.6s), 2500/2500 VUs, 43675 complete and 0 interrupted iterations
+browse_balance       [  17% ] 1500/1500 VUs  0m54.6s/5m20.0s
+commit_transfer      [  17% ] 550/550 VUs    0m54.6s/5m20.0s
+idempotency_replay   [  17% ] 450/450 VUs    0m54.6s/5m20.0s
+
+running (0m55.6s), 2500/2500 VUs, 44539 complete and 0 interrupted iterations
+browse_balance       [  17% ] 1500/1500 VUs  0m55.6s/5m20.0s
+commit_transfer      [  17% ] 550/550 VUs    0m55.6s/5m20.0s
+idempotency_replay   [  17% ] 450/450 VUs    0m55.6s/5m20.0s
+
+running (0m56.6s), 2500/2500 VUs, 45426 complete and 0 interrupted iterations
+browse_balance       [  18% ] 1500/1500 VUs  0m56.6s/5m20.0s
+commit_transfer      [  18% ] 550/550 VUs    0m56.6s/5m20.0s
+idempotency_replay   [  18% ] 450/450 VUs    0m56.6s/5m20.0s
+
+running (0m57.6s), 2500/2500 VUs, 46295 complete and 0 interrupted iterations
+browse_balance       [  18% ] 1500/1500 VUs  0m57.6s/5m20.0s
+commit_transfer      [  18% ] 550/550 VUs    0m57.6s/5m20.0s
+idempotency_replay   [  18% ] 450/450 VUs    0m57.6s/5m20.0s
+
+running (0m58.6s), 2500/2500 VUs, 47203 complete and 0 interrupted iterations
+browse_balance       [  18% ] 1500/1500 VUs  0m58.6s/5m20.0s
+commit_transfer      [  18% ] 550/550 VUs    0m58.6s/5m20.0s
+idempotency_replay   [  18% ] 450/450 VUs    0m58.6s/5m20.0s
+
+running (0m59.6s), 2500/2500 VUs, 48046 complete and 0 interrupted iterations
+browse_balance       [  19% ] 1500/1500 VUs  0m59.6s/5m20.0s
+commit_transfer      [  19% ] 550/550 VUs    0m59.6s/5m20.0s
+idempotency_replay   [  19% ] 450/450 VUs    0m59.6s/5m20.0s
+
+running (1m00.6s), 2500/2500 VUs, 48904 complete and 0 interrupted iterations
+browse_balance       [  19% ] 1500/1500 VUs  1m00.6s/5m20.0s
+commit_transfer      [  19% ] 550/550 VUs    1m00.6s/5m20.0s
+idempotency_replay   [  19% ] 450/450 VUs    1m00.6s/5m20.0s
+
+running (1m01.6s), 2500/2500 VUs, 49799 complete and 0 interrupted iterations
+browse_balance       [  19% ] 1500/1500 VUs  1m01.6s/5m20.0s
+commit_transfer      [  19% ] 550/550 VUs    1m01.6s/5m20.0s
+idempotency_replay   [  19% ] 450/450 VUs    1m01.6s/5m20.0s
+
+running (1m02.6s), 2500/2500 VUs, 50630 complete and 0 interrupted iterations
+browse_balance       [  20% ] 1500/1500 VUs  1m02.6s/5m20.0s
+commit_transfer      [  20% ] 550/550 VUs    1m02.6s/5m20.0s
+idempotency_replay   [  20% ] 450/450 VUs    1m02.6s/5m20.0s
+
+running (1m03.6s), 2500/2500 VUs, 51479 complete and 0 interrupted iterations
+browse_balance       [  20% ] 1500/1500 VUs  1m03.6s/5m20.0s
+commit_transfer      [  20% ] 550/550 VUs    1m03.6s/5m20.0s
+idempotency_replay   [  20% ] 450/450 VUs    1m03.6s/5m20.0s
+
+running (1m04.6s), 2500/2500 VUs, 52314 complete and 0 interrupted iterations
+browse_balance       [  20% ] 1500/1500 VUs  1m04.6s/5m20.0s
+commit_transfer      [  20% ] 550/550 VUs    1m04.6s/5m20.0s
+idempotency_replay   [  20% ] 450/450 VUs    1m04.6s/5m20.0s
+
+running (1m05.6s), 2500/2500 VUs, 53104 complete and 0 interrupted iterations
+browse_balance       [  21% ] 1500/1500 VUs  1m05.6s/5m20.0s
+commit_transfer      [  21% ] 550/550 VUs    1m05.6s/5m20.0s
+idempotency_replay   [  21% ] 450/450 VUs    1m05.6s/5m20.0s
+
+running (1m06.6s), 2500/2500 VUs, 53734 complete and 0 interrupted iterations
+browse_balance       [  21% ] 1500/1500 VUs  1m06.6s/5m20.0s
+commit_transfer      [  21% ] 550/550 VUs    1m06.6s/5m20.0s
+idempotency_replay   [  21% ] 450/450 VUs    1m06.6s/5m20.0s
+
+running (1m07.6s), 2500/2500 VUs, 54374 complete and 0 interrupted iterations
+browse_balance       [  21% ] 1500/1500 VUs  1m07.6s/5m20.0s
+commit_transfer      [  21% ] 550/550 VUs    1m07.6s/5m20.0s
+idempotency_replay   [  21% ] 450/450 VUs    1m07.6s/5m20.0s
+
+running (1m08.6s), 2500/2500 VUs, 55037 complete and 0 interrupted iterations
+browse_balance       [  21% ] 1500/1500 VUs  1m08.6s/5m20.0s
+commit_transfer      [  21% ] 550/550 VUs    1m08.6s/5m20.0s
+idempotency_replay   [  21% ] 450/450 VUs    1m08.6s/5m20.0s
+
+running (1m09.6s), 2500/2500 VUs, 55792 complete and 0 interrupted iterations
+browse_balance       [  22% ] 1500/1500 VUs  1m09.6s/5m20.0s
+commit_transfer      [  22% ] 550/550 VUs    1m09.6s/5m20.0s
+idempotency_replay   [  22% ] 450/450 VUs    1m09.6s/5m20.0s
+
+running (1m10.6s), 2500/2500 VUs, 56565 complete and 0 interrupted iterations
+browse_balance       [  22% ] 1500/1500 VUs  1m10.6s/5m20.0s
+commit_transfer      [  22% ] 550/550 VUs    1m10.6s/5m20.0s
+idempotency_replay   [  22% ] 450/450 VUs    1m10.6s/5m20.0s
+
+running (1m11.6s), 2500/2500 VUs, 57335 complete and 0 interrupted iterations
+browse_balance       [  22% ] 1500/1500 VUs  1m11.6s/5m20.0s
+commit_transfer      [  22% ] 550/550 VUs    1m11.6s/5m20.0s
+idempotency_replay   [  22% ] 450/450 VUs    1m11.6s/5m20.0s
+
+running (1m12.6s), 2500/2500 VUs, 58103 complete and 0 interrupted iterations
+browse_balance       [  23% ] 1500/1500 VUs  1m12.6s/5m20.0s
+commit_transfer      [  23% ] 550/550 VUs    1m12.6s/5m20.0s
+idempotency_replay   [  23% ] 450/450 VUs    1m12.6s/5m20.0s
+
+running (1m13.6s), 2500/2500 VUs, 58859 complete and 0 interrupted iterations
+browse_balance       [  23% ] 1500/1500 VUs  1m13.6s/5m20.0s
+commit_transfer      [  23% ] 550/550 VUs    1m13.6s/5m20.0s
+idempotency_replay   [  23% ] 450/450 VUs    1m13.6s/5m20.0s
+
+running (1m14.6s), 2500/2500 VUs, 59647 complete and 0 interrupted iterations
+browse_balance       [  23% ] 1500/1500 VUs  1m14.6s/5m20.0s
+commit_transfer      [  23% ] 550/550 VUs    1m14.6s/5m20.0s
+idempotency_replay   [  23% ] 450/450 VUs    1m14.6s/5m20.0s
+
+running (1m15.6s), 2500/2500 VUs, 60416 complete and 0 interrupted iterations
+browse_balance       [  24% ] 1500/1500 VUs  1m15.6s/5m20.0s
+commit_transfer      [  24% ] 550/550 VUs    1m15.6s/5m20.0s
+idempotency_replay   [  24% ] 450/450 VUs    1m15.6s/5m20.0s
+
+running (1m16.6s), 2500/2500 VUs, 61224 complete and 0 interrupted iterations
+browse_balance       [  24% ] 1500/1500 VUs  1m16.6s/5m20.0s
+commit_transfer      [  24% ] 550/550 VUs    1m16.6s/5m20.0s
+idempotency_replay   [  24% ] 450/450 VUs    1m16.6s/5m20.0s
+
+running (1m17.6s), 2500/2500 VUs, 61937 complete and 0 interrupted iterations
+browse_balance       [  24% ] 1500/1500 VUs  1m17.6s/5m20.0s
+commit_transfer      [  24% ] 550/550 VUs    1m17.6s/5m20.0s
+idempotency_replay   [  24% ] 450/450 VUs    1m17.6s/5m20.0s
+
+running (1m18.6s), 2500/2500 VUs, 62712 complete and 0 interrupted iterations
+browse_balance       [  25% ] 1500/1500 VUs  1m18.6s/5m20.0s
+commit_transfer      [  25% ] 550/550 VUs    1m18.6s/5m20.0s
+idempotency_replay   [  25% ] 450/450 VUs    1m18.6s/5m20.0s
+
+running (1m19.6s), 2500/2500 VUs, 63486 complete and 0 interrupted iterations
+browse_balance       [  25% ] 1500/1500 VUs  1m19.6s/5m20.0s
+commit_transfer      [  25% ] 550/550 VUs    1m19.6s/5m20.0s
+idempotency_replay   [  25% ] 450/450 VUs    1m19.6s/5m20.0s
+
+running (1m20.6s), 2500/2500 VUs, 64243 complete and 0 interrupted iterations
+browse_balance       [  25% ] 1500/1500 VUs  1m20.6s/5m20.0s
+commit_transfer      [  25% ] 550/550 VUs    1m20.6s/5m20.0s
+idempotency_replay   [  25% ] 450/450 VUs    1m20.6s/5m20.0s
+
+running (1m21.6s), 2500/2500 VUs, 65003 complete and 0 interrupted iterations
+browse_balance       [  26% ] 1500/1500 VUs  1m21.6s/5m20.0s
+commit_transfer      [  26% ] 550/550 VUs    1m21.6s/5m20.0s
+idempotency_replay   [  26% ] 450/450 VUs    1m21.6s/5m20.0s
+
+running (1m22.6s), 2500/2500 VUs, 65740 complete and 0 interrupted iterations
+browse_balance       [  26% ] 1500/1500 VUs  1m22.6s/5m20.0s
+commit_transfer      [  26% ] 550/550 VUs    1m22.6s/5m20.0s
+idempotency_replay   [  26% ] 450/450 VUs    1m22.6s/5m20.0s
+
+running (1m23.6s), 2500/2500 VUs, 66498 complete and 0 interrupted iterations
+browse_balance       [  26% ] 1500/1500 VUs  1m23.6s/5m20.0s
+commit_transfer      [  26% ] 550/550 VUs    1m23.6s/5m20.0s
+idempotency_replay   [  26% ] 450/450 VUs    1m23.6s/5m20.0s
+
+running (1m24.6s), 2500/2500 VUs, 67256 complete and 0 interrupted iterations
+browse_balance       [  26% ] 1500/1500 VUs  1m24.6s/5m20.0s
+commit_transfer      [  26% ] 550/550 VUs    1m24.6s/5m20.0s
+idempotency_replay   [  26% ] 450/450 VUs    1m24.6s/5m20.0s
+
+running (1m25.6s), 2500/2500 VUs, 68010 complete and 0 interrupted iterations
+browse_balance       [  27% ] 1500/1500 VUs  1m25.6s/5m20.0s
+commit_transfer      [  27% ] 550/550 VUs    1m25.6s/5m20.0s
+idempotency_replay   [  27% ] 450/450 VUs    1m25.6s/5m20.0s
+
+running (1m26.6s), 2500/2500 VUs, 68728 complete and 0 interrupted iterations
+browse_balance       [  27% ] 1500/1500 VUs  1m26.6s/5m20.0s
+commit_transfer      [  27% ] 550/550 VUs    1m26.6s/5m20.0s
+idempotency_replay   [  27% ] 450/450 VUs    1m26.6s/5m20.0s
+
+running (1m27.6s), 2500/2500 VUs, 69434 complete and 0 interrupted iterations
+browse_balance       [  27% ] 1500/1500 VUs  1m27.6s/5m20.0s
+commit_transfer      [  27% ] 550/550 VUs    1m27.6s/5m20.0s
+idempotency_replay   [  27% ] 450/450 VUs    1m27.6s/5m20.0s
+
+running (1m28.6s), 2500/2500 VUs, 70163 complete and 0 interrupted iterations
+browse_balance       [  28% ] 1500/1500 VUs  1m28.6s/5m20.0s
+commit_transfer      [  28% ] 550/550 VUs    1m28.6s/5m20.0s
+idempotency_replay   [  28% ] 450/450 VUs    1m28.6s/5m20.0s
+
+running (1m29.6s), 2500/2500 VUs, 70864 complete and 0 interrupted iterations
+browse_balance       [  28% ] 1500/1500 VUs  1m29.6s/5m20.0s
+commit_transfer      [  28% ] 550/550 VUs    1m29.6s/5m20.0s
+idempotency_replay   [  28% ] 450/450 VUs    1m29.6s/5m20.0s
+
+running (1m30.6s), 2500/2500 VUs, 71639 complete and 0 interrupted iterations
+browse_balance       [  28% ] 1500/1500 VUs  1m30.6s/5m20.0s
+commit_transfer      [  28% ] 550/550 VUs    1m30.6s/5m20.0s
+idempotency_replay   [  28% ] 450/450 VUs    1m30.6s/5m20.0s
+
+running (1m31.6s), 2500/2500 VUs, 72335 complete and 0 interrupted iterations
+browse_balance       [  29% ] 1500/1500 VUs  1m31.6s/5m20.0s
+commit_transfer      [  29% ] 550/550 VUs    1m31.6s/5m20.0s
+idempotency_replay   [  29% ] 450/450 VUs    1m31.6s/5m20.0s
+
+running (1m32.6s), 2500/2500 VUs, 73055 complete and 0 interrupted iterations
+browse_balance       [  29% ] 1500/1500 VUs  1m32.6s/5m20.0s
+commit_transfer      [  29% ] 550/550 VUs    1m32.6s/5m20.0s
+idempotency_replay   [  29% ] 450/450 VUs    1m32.6s/5m20.0s
+
+running (1m33.6s), 2500/2500 VUs, 73780 complete and 0 interrupted iterations
+browse_balance       [  29% ] 1500/1500 VUs  1m33.6s/5m20.0s
+commit_transfer      [  29% ] 550/550 VUs    1m33.6s/5m20.0s
+idempotency_replay   [  29% ] 450/450 VUs    1m33.6s/5m20.0s
+
+running (1m34.6s), 2500/2500 VUs, 74491 complete and 0 interrupted iterations
+browse_balance       [  30% ] 1500/1500 VUs  1m34.6s/5m20.0s
+commit_transfer      [  30% ] 550/550 VUs    1m34.6s/5m20.0s
+idempotency_replay   [  30% ] 450/450 VUs    1m34.6s/5m20.0s
+
+running (1m35.6s), 2500/2500 VUs, 75200 complete and 0 interrupted iterations
+browse_balance       [  30% ] 1500/1500 VUs  1m35.6s/5m20.0s
+commit_transfer      [  30% ] 550/550 VUs    1m35.6s/5m20.0s
+idempotency_replay   [  30% ] 450/450 VUs    1m35.6s/5m20.0s
+
+running (1m36.6s), 2500/2500 VUs, 75900 complete and 0 interrupted iterations
+browse_balance       [  30% ] 1500/1500 VUs  1m36.6s/5m20.0s
+commit_transfer      [  30% ] 550/550 VUs    1m36.6s/5m20.0s
+idempotency_replay   [  30% ] 450/450 VUs    1m36.6s/5m20.0s
+
+running (1m37.6s), 2500/2500 VUs, 76610 complete and 0 interrupted iterations
+browse_balance       [  31% ] 1500/1500 VUs  1m37.6s/5m20.0s
+commit_transfer      [  31% ] 550/550 VUs    1m37.6s/5m20.0s
+idempotency_replay   [  31% ] 450/450 VUs    1m37.6s/5m20.0s
+
+running (1m38.6s), 2500/2500 VUs, 77301 complete and 0 interrupted iterations
+browse_balance       [  31% ] 1500/1500 VUs  1m38.6s/5m20.0s
+commit_transfer      [  31% ] 550/550 VUs    1m38.6s/5m20.0s
+idempotency_replay   [  31% ] 450/450 VUs    1m38.6s/5m20.0s
+
+running (1m39.6s), 2500/2500 VUs, 78035 complete and 0 interrupted iterations
+browse_balance       [  31% ] 1500/1500 VUs  1m39.6s/5m20.0s
+commit_transfer      [  31% ] 550/550 VUs    1m39.6s/5m20.0s
+idempotency_replay   [  31% ] 450/450 VUs    1m39.6s/5m20.0s
+
+running (1m40.6s), 2500/2500 VUs, 78702 complete and 0 interrupted iterations
+browse_balance       [  31% ] 1500/1500 VUs  1m40.6s/5m20.0s
+commit_transfer      [  31% ] 550/550 VUs    1m40.6s/5m20.0s
+idempotency_replay   [  31% ] 450/450 VUs    1m40.6s/5m20.0s
+
+running (1m41.6s), 2500/2500 VUs, 79411 complete and 0 interrupted iterations
+browse_balance       [  32% ] 1500/1500 VUs  1m41.6s/5m20.0s
+commit_transfer      [  32% ] 550/550 VUs    1m41.6s/5m20.0s
+idempotency_replay   [  32% ] 450/450 VUs    1m41.6s/5m20.0s
+
+running (1m42.6s), 2500/2500 VUs, 80098 complete and 0 interrupted iterations
+browse_balance       [  32% ] 1500/1500 VUs  1m42.6s/5m20.0s
+commit_transfer      [  32% ] 550/550 VUs    1m42.6s/5m20.0s
+idempotency_replay   [  32% ] 450/450 VUs    1m42.6s/5m20.0s
+
+running (1m43.6s), 2500/2500 VUs, 80785 complete and 0 interrupted iterations
+browse_balance       [  32% ] 1500/1500 VUs  1m43.6s/5m20.0s
+commit_transfer      [  32% ] 550/550 VUs    1m43.6s/5m20.0s
+idempotency_replay   [  32% ] 450/450 VUs    1m43.6s/5m20.0s
+
+running (1m44.6s), 2500/2500 VUs, 81500 complete and 0 interrupted iterations
+browse_balance       [  33% ] 1500/1500 VUs  1m44.6s/5m20.0s
+commit_transfer      [  33% ] 550/550 VUs    1m44.6s/5m20.0s
+idempotency_replay   [  33% ] 450/450 VUs    1m44.6s/5m20.0s
+
+running (1m45.6s), 2500/2500 VUs, 82123 complete and 0 interrupted iterations
+browse_balance       [  33% ] 1500/1500 VUs  1m45.6s/5m20.0s
+commit_transfer      [  33% ] 550/550 VUs    1m45.6s/5m20.0s
+idempotency_replay   [  33% ] 450/450 VUs    1m45.6s/5m20.0s
+
+running (1m46.6s), 2500/2500 VUs, 82812 complete and 0 interrupted iterations
+browse_balance       [  33% ] 1500/1500 VUs  1m46.6s/5m20.0s
+commit_transfer      [  33% ] 550/550 VUs    1m46.6s/5m20.0s
+idempotency_replay   [  33% ] 450/450 VUs    1m46.6s/5m20.0s
+
+running (1m47.6s), 2500/2500 VUs, 83477 complete and 0 interrupted iterations
+browse_balance       [  34% ] 1500/1500 VUs  1m47.6s/5m20.0s
+commit_transfer      [  34% ] 550/550 VUs    1m47.6s/5m20.0s
+idempotency_replay   [  34% ] 450/450 VUs    1m47.6s/5m20.0s
+
+running (1m48.6s), 2500/2500 VUs, 84140 complete and 0 interrupted iterations
+browse_balance       [  34% ] 1500/1500 VUs  1m48.6s/5m20.0s
+commit_transfer      [  34% ] 550/550 VUs    1m48.6s/5m20.0s
+idempotency_replay   [  34% ] 450/450 VUs    1m48.6s/5m20.0s
+
+running (1m49.6s), 2500/2500 VUs, 84807 complete and 0 interrupted iterations
+browse_balance       [  34% ] 1500/1500 VUs  1m49.6s/5m20.0s
+commit_transfer      [  34% ] 550/550 VUs    1m49.6s/5m20.0s
+idempotency_replay   [  34% ] 450/450 VUs    1m49.6s/5m20.0s
+
+running (1m50.6s), 2500/2500 VUs, 85450 complete and 0 interrupted iterations
+browse_balance       [  35% ] 1500/1500 VUs  1m50.6s/5m20.0s
+commit_transfer      [  35% ] 550/550 VUs    1m50.6s/5m20.0s
+idempotency_replay   [  35% ] 450/450 VUs    1m50.6s/5m20.0s
+
+running (1m51.6s), 2500/2500 VUs, 86114 complete and 0 interrupted iterations
+browse_balance       [  35% ] 1500/1500 VUs  1m51.6s/5m20.0s
+commit_transfer      [  35% ] 550/550 VUs    1m51.6s/5m20.0s
+idempotency_replay   [  35% ] 450/450 VUs    1m51.6s/5m20.0s
+
+running (1m52.6s), 2500/2500 VUs, 86820 complete and 0 interrupted iterations
+browse_balance       [  35% ] 1500/1500 VUs  1m52.6s/5m20.0s
+commit_transfer      [  35% ] 550/550 VUs    1m52.6s/5m20.0s
+idempotency_replay   [  35% ] 450/450 VUs    1m52.6s/5m20.0s
+
+running (1m53.6s), 2500/2500 VUs, 87522 complete and 0 interrupted iterations
+browse_balance       [  36% ] 1500/1500 VUs  1m53.6s/5m20.0s
+commit_transfer      [  36% ] 550/550 VUs    1m53.6s/5m20.0s
+idempotency_replay   [  36% ] 450/450 VUs    1m53.6s/5m20.0s
+
+running (1m54.6s), 2500/2500 VUs, 88171 complete and 0 interrupted iterations
+browse_balance       [  36% ] 1500/1500 VUs  1m54.6s/5m20.0s
+commit_transfer      [  36% ] 550/550 VUs    1m54.6s/5m20.0s
+idempotency_replay   [  36% ] 450/450 VUs    1m54.6s/5m20.0s
+
+running (1m55.6s), 2500/2500 VUs, 88846 complete and 0 interrupted iterations
+browse_balance       [  36% ] 1500/1500 VUs  1m55.6s/5m20.0s
+commit_transfer      [  36% ] 550/550 VUs    1m55.6s/5m20.0s
+idempotency_replay   [  36% ] 450/450 VUs    1m55.6s/5m20.0s
+
+running (1m56.6s), 2500/2500 VUs, 89508 complete and 0 interrupted iterations
+browse_balance       [  36% ] 1500/1500 VUs  1m56.6s/5m20.0s
+commit_transfer      [  36% ] 550/550 VUs    1m56.6s/5m20.0s
+idempotency_replay   [  36% ] 450/450 VUs    1m56.6s/5m20.0s
+
+running (1m57.6s), 2500/2500 VUs, 90185 complete and 0 interrupted iterations
+browse_balance       [  37% ] 1500/1500 VUs  1m57.6s/5m20.0s
+commit_transfer      [  37% ] 550/550 VUs    1m57.6s/5m20.0s
+idempotency_replay   [  37% ] 450/450 VUs    1m57.6s/5m20.0s
+
+running (1m58.6s), 2500/2500 VUs, 90806 complete and 0 interrupted iterations
+browse_balance       [  37% ] 1500/1500 VUs  1m58.6s/5m20.0s
+commit_transfer      [  37% ] 550/550 VUs    1m58.6s/5m20.0s
+idempotency_replay   [  37% ] 450/450 VUs    1m58.6s/5m20.0s
+
+running (1m59.6s), 2500/2500 VUs, 91440 complete and 0 interrupted iterations
+browse_balance       [  37% ] 1500/1500 VUs  1m59.6s/5m20.0s
+commit_transfer      [  37% ] 550/550 VUs    1m59.6s/5m20.0s
+idempotency_replay   [  37% ] 450/450 VUs    1m59.6s/5m20.0s
+
+running (2m00.6s), 2500/2500 VUs, 92060 complete and 0 interrupted iterations
+browse_balance       [  38% ] 1500/1500 VUs  2m00.6s/5m20.0s
+commit_transfer      [  38% ] 550/550 VUs    2m00.6s/5m20.0s
+idempotency_replay   [  38% ] 450/450 VUs    2m00.6s/5m20.0s
+
+running (2m01.6s), 2500/2500 VUs, 92751 complete and 0 interrupted iterations
+browse_balance       [  38% ] 1500/1500 VUs  2m01.6s/5m20.0s
+commit_transfer      [  38% ] 550/550 VUs    2m01.6s/5m20.0s
+idempotency_replay   [  38% ] 450/450 VUs    2m01.6s/5m20.0s
+
+running (2m02.6s), 2500/2500 VUs, 93419 complete and 0 interrupted iterations
+browse_balance       [  38% ] 1500/1500 VUs  2m02.6s/5m20.0s
+commit_transfer      [  38% ] 550/550 VUs    2m02.6s/5m20.0s
+idempotency_replay   [  38% ] 450/450 VUs    2m02.6s/5m20.0s
+
+running (2m03.6s), 2500/2500 VUs, 94122 complete and 0 interrupted iterations
+browse_balance       [  39% ] 1500/1500 VUs  2m03.6s/5m20.0s
+commit_transfer      [  39% ] 550/550 VUs    2m03.6s/5m20.0s
+idempotency_replay   [  39% ] 450/450 VUs    2m03.6s/5m20.0s
+
+running (2m04.6s), 2500/2500 VUs, 94766 complete and 0 interrupted iterations
+browse_balance       [  39% ] 1500/1500 VUs  2m04.6s/5m20.0s
+commit_transfer      [  39% ] 550/550 VUs    2m04.6s/5m20.0s
+idempotency_replay   [  39% ] 450/450 VUs    2m04.6s/5m20.0s
+
+running (2m05.6s), 2500/2500 VUs, 95430 complete and 0 interrupted iterations
+browse_balance       [  39% ] 1500/1500 VUs  2m05.6s/5m20.0s
+commit_transfer      [  39% ] 550/550 VUs    2m05.6s/5m20.0s
+idempotency_replay   [  39% ] 450/450 VUs    2m05.6s/5m20.0s
+
+running (2m06.6s), 2500/2500 VUs, 96075 complete and 0 interrupted iterations
+browse_balance       [  40% ] 1500/1500 VUs  2m06.6s/5m20.0s
+commit_transfer      [  40% ] 550/550 VUs    2m06.6s/5m20.0s
+idempotency_replay   [  40% ] 450/450 VUs    2m06.6s/5m20.0s
+
+running (2m07.6s), 2500/2500 VUs, 96732 complete and 0 interrupted iterations
+browse_balance       [  40% ] 1500/1500 VUs  2m07.6s/5m20.0s
+commit_transfer      [  40% ] 550/550 VUs    2m07.6s/5m20.0s
+idempotency_replay   [  40% ] 450/450 VUs    2m07.6s/5m20.0s
+
+running (2m08.6s), 2500/2500 VUs, 97354 complete and 0 interrupted iterations
+browse_balance       [  40% ] 1500/1500 VUs  2m08.6s/5m20.0s
+commit_transfer      [  40% ] 550/550 VUs    2m08.6s/5m20.0s
+idempotency_replay   [  40% ] 450/450 VUs    2m08.6s/5m20.0s
+
+running (2m09.6s), 2500/2500 VUs, 97995 complete and 0 interrupted iterations
+browse_balance       [  41% ] 1500/1500 VUs  2m09.6s/5m20.0s
+commit_transfer      [  41% ] 550/550 VUs    2m09.6s/5m20.0s
+idempotency_replay   [  41% ] 450/450 VUs    2m09.6s/5m20.0s
+
+running (2m10.6s), 2500/2500 VUs, 98582 complete and 0 interrupted iterations
+browse_balance       [  41% ] 1500/1500 VUs  2m10.6s/5m20.0s
+commit_transfer      [  41% ] 550/550 VUs    2m10.6s/5m20.0s
+idempotency_replay   [  41% ] 450/450 VUs    2m10.6s/5m20.0s
+
+running (2m11.6s), 2500/2500 VUs, 99216 complete and 0 interrupted iterations
+browse_balance       [  41% ] 1500/1500 VUs  2m11.6s/5m20.0s
+commit_transfer      [  41% ] 550/550 VUs    2m11.6s/5m20.0s
+idempotency_replay   [  41% ] 450/450 VUs    2m11.6s/5m20.0s
+
+running (2m12.6s), 2500/2500 VUs, 99846 complete and 0 interrupted iterations
+browse_balance       [  41% ] 1500/1500 VUs  2m12.6s/5m20.0s
+commit_transfer      [  41% ] 550/550 VUs    2m12.6s/5m20.0s
+idempotency_replay   [  41% ] 450/450 VUs    2m12.6s/5m20.0s
+
+running (2m13.6s), 2500/2500 VUs, 100428 complete and 0 interrupted iterations
+browse_balance       [  42% ] 1500/1500 VUs  2m13.6s/5m20.0s
+commit_transfer      [  42% ] 550/550 VUs    2m13.6s/5m20.0s
+idempotency_replay   [  42% ] 450/450 VUs    2m13.6s/5m20.0s
+
+running (2m14.6s), 2500/2500 VUs, 101035 complete and 0 interrupted iterations
+browse_balance       [  42% ] 1500/1500 VUs  2m14.6s/5m20.0s
+commit_transfer      [  42% ] 550/550 VUs    2m14.6s/5m20.0s
+idempotency_replay   [  42% ] 450/450 VUs    2m14.6s/5m20.0s
+
+running (2m15.6s), 2500/2500 VUs, 101675 complete and 0 interrupted iterations
+browse_balance       [  42% ] 1500/1500 VUs  2m15.6s/5m20.0s
+commit_transfer      [  42% ] 550/550 VUs    2m15.6s/5m20.0s
+idempotency_replay   [  42% ] 450/450 VUs    2m15.6s/5m20.0s
+
+running (2m16.6s), 2500/2500 VUs, 102281 complete and 0 interrupted iterations
+browse_balance       [  43% ] 1500/1500 VUs  2m16.6s/5m20.0s
+commit_transfer      [  43% ] 550/550 VUs    2m16.6s/5m20.0s
+idempotency_replay   [  43% ] 450/450 VUs    2m16.6s/5m20.0s
+
+running (2m17.6s), 2500/2500 VUs, 102865 complete and 0 interrupted iterations
+browse_balance       [  43% ] 1500/1500 VUs  2m17.6s/5m20.0s
+commit_transfer      [  43% ] 550/550 VUs    2m17.6s/5m20.0s
+idempotency_replay   [  43% ] 450/450 VUs    2m17.6s/5m20.0s
+
+running (2m18.6s), 2500/2500 VUs, 103494 complete and 0 interrupted iterations
+browse_balance       [  43% ] 1500/1500 VUs  2m18.6s/5m20.0s
+commit_transfer      [  43% ] 550/550 VUs    2m18.6s/5m20.0s
+idempotency_replay   [  43% ] 450/450 VUs    2m18.6s/5m20.0s
+
+running (2m19.6s), 2500/2500 VUs, 104124 complete and 0 interrupted iterations
+browse_balance       [  44% ] 1500/1500 VUs  2m19.6s/5m20.0s
+commit_transfer      [  44% ] 550/550 VUs    2m19.6s/5m20.0s
+idempotency_replay   [  44% ] 450/450 VUs    2m19.6s/5m20.0s
+
+running (2m20.6s), 2500/2500 VUs, 104736 complete and 0 interrupted iterations
+browse_balance       [  44% ] 1500/1500 VUs  2m20.6s/5m20.0s
+commit_transfer      [  44% ] 550/550 VUs    2m20.6s/5m20.0s
+idempotency_replay   [  44% ] 450/450 VUs    2m20.6s/5m20.0s
+
+running (2m21.6s), 2500/2500 VUs, 105350 complete and 0 interrupted iterations
+browse_balance       [  44% ] 1500/1500 VUs  2m21.6s/5m20.0s
+commit_transfer      [  44% ] 550/550 VUs    2m21.6s/5m20.0s
+idempotency_replay   [  44% ] 450/450 VUs    2m21.6s/5m20.0s
+
+running (2m22.6s), 2500/2500 VUs, 105913 complete and 0 interrupted iterations
+browse_balance       [  45% ] 1500/1500 VUs  2m22.6s/5m20.0s
+commit_transfer      [  45% ] 550/550 VUs    2m22.6s/5m20.0s
+idempotency_replay   [  45% ] 450/450 VUs    2m22.6s/5m20.0s
+
+running (2m23.6s), 2500/2500 VUs, 106493 complete and 0 interrupted iterations
+browse_balance       [  45% ] 1500/1500 VUs  2m23.6s/5m20.0s
+commit_transfer      [  45% ] 550/550 VUs    2m23.6s/5m20.0s
+idempotency_replay   [  45% ] 450/450 VUs    2m23.6s/5m20.0s
+
+running (2m24.6s), 2500/2500 VUs, 107131 complete and 0 interrupted iterations
+browse_balance       [  45% ] 1500/1500 VUs  2m24.6s/5m20.0s
+commit_transfer      [  45% ] 550/550 VUs    2m24.6s/5m20.0s
+idempotency_replay   [  45% ] 450/450 VUs    2m24.6s/5m20.0s
+
+running (2m25.6s), 2500/2500 VUs, 107726 complete and 0 interrupted iterations
+browse_balance       [  46% ] 1500/1500 VUs  2m25.6s/5m20.0s
+commit_transfer      [  46% ] 550/550 VUs    2m25.6s/5m20.0s
+idempotency_replay   [  46% ] 450/450 VUs    2m25.6s/5m20.0s
+
+running (2m26.6s), 2500/2500 VUs, 108301 complete and 0 interrupted iterations
+browse_balance       [  46% ] 1500/1500 VUs  2m26.6s/5m20.0s
+commit_transfer      [  46% ] 550/550 VUs    2m26.6s/5m20.0s
+idempotency_replay   [  46% ] 450/450 VUs    2m26.6s/5m20.0s
+
+running (2m27.6s), 2500/2500 VUs, 108916 complete and 0 interrupted iterations
+browse_balance       [  46% ] 1500/1500 VUs  2m27.6s/5m20.0s
+commit_transfer      [  46% ] 550/550 VUs    2m27.6s/5m20.0s
+idempotency_replay   [  46% ] 450/450 VUs    2m27.6s/5m20.0s
+
+running (2m28.6s), 2500/2500 VUs, 109501 complete and 0 interrupted iterations
+browse_balance       [  46% ] 1500/1500 VUs  2m28.6s/5m20.0s
+commit_transfer      [  46% ] 550/550 VUs    2m28.6s/5m20.0s
+idempotency_replay   [  46% ] 450/450 VUs    2m28.6s/5m20.0s
+
+running (2m29.6s), 2500/2500 VUs, 110072 complete and 0 interrupted iterations
+browse_balance       [  47% ] 1500/1500 VUs  2m29.6s/5m20.0s
+commit_transfer      [  47% ] 550/550 VUs    2m29.6s/5m20.0s
+idempotency_replay   [  47% ] 450/450 VUs    2m29.6s/5m20.0s
+
+running (2m30.6s), 2500/2500 VUs, 110650 complete and 0 interrupted iterations
+browse_balance       [  47% ] 1500/1500 VUs  2m30.6s/5m20.0s
+commit_transfer      [  47% ] 550/550 VUs    2m30.6s/5m20.0s
+idempotency_replay   [  47% ] 450/450 VUs    2m30.6s/5m20.0s
+
+running (2m31.6s), 2500/2500 VUs, 111238 complete and 0 interrupted iterations
+browse_balance       [  47% ] 1500/1500 VUs  2m31.6s/5m20.0s
+commit_transfer      [  47% ] 550/550 VUs    2m31.6s/5m20.0s
+idempotency_replay   [  47% ] 450/450 VUs    2m31.6s/5m20.0s
+
+running (2m32.6s), 2500/2500 VUs, 111814 complete and 0 interrupted iterations
+browse_balance       [  48% ] 1500/1500 VUs  2m32.6s/5m20.0s
+commit_transfer      [  48% ] 550/550 VUs    2m32.6s/5m20.0s
+idempotency_replay   [  48% ] 450/450 VUs    2m32.6s/5m20.0s
+
+running (2m33.6s), 2500/2500 VUs, 112405 complete and 0 interrupted iterations
+browse_balance       [  48% ] 1500/1500 VUs  2m33.6s/5m20.0s
+commit_transfer      [  48% ] 550/550 VUs    2m33.6s/5m20.0s
+idempotency_replay   [  48% ] 450/450 VUs    2m33.6s/5m20.0s
+
+running (2m34.6s), 2500/2500 VUs, 113019 complete and 0 interrupted iterations
+browse_balance       [  48% ] 1500/1500 VUs  2m34.6s/5m20.0s
+commit_transfer      [  48% ] 550/550 VUs    2m34.6s/5m20.0s
+idempotency_replay   [  48% ] 450/450 VUs    2m34.6s/5m20.0s
+
+running (2m35.6s), 2500/2500 VUs, 113555 complete and 0 interrupted iterations
+browse_balance       [  49% ] 1500/1500 VUs  2m35.6s/5m20.0s
+commit_transfer      [  49% ] 550/550 VUs    2m35.6s/5m20.0s
+idempotency_replay   [  49% ] 450/450 VUs    2m35.6s/5m20.0s
+
+running (2m36.6s), 2500/2500 VUs, 114101 complete and 0 interrupted iterations
+browse_balance       [  49% ] 1500/1500 VUs  2m36.6s/5m20.0s
+commit_transfer      [  49% ] 550/550 VUs    2m36.6s/5m20.0s
+idempotency_replay   [  49% ] 450/450 VUs    2m36.6s/5m20.0s
+
+running (2m37.6s), 2500/2500 VUs, 114729 complete and 0 interrupted iterations
+browse_balance       [  49% ] 1500/1500 VUs  2m37.6s/5m20.0s
+commit_transfer      [  49% ] 550/550 VUs    2m37.6s/5m20.0s
+idempotency_replay   [  49% ] 450/450 VUs    2m37.6s/5m20.0s
+
+running (2m38.6s), 2500/2500 VUs, 115347 complete and 0 interrupted iterations
+browse_balance       [  50% ] 1500/1500 VUs  2m38.6s/5m20.0s
+commit_transfer      [  50% ] 550/550 VUs    2m38.6s/5m20.0s
+idempotency_replay   [  50% ] 450/450 VUs    2m38.6s/5m20.0s
+
+running (2m39.6s), 2500/2500 VUs, 115890 complete and 0 interrupted iterations
+browse_balance       [  50% ] 1500/1500 VUs  2m39.6s/5m20.0s
+commit_transfer      [  50% ] 550/550 VUs    2m39.6s/5m20.0s
+idempotency_replay   [  50% ] 450/450 VUs    2m39.6s/5m20.0s
+
+running (2m40.6s), 2500/2500 VUs, 116417 complete and 0 interrupted iterations
+browse_balance       [  50% ] 1500/1500 VUs  2m40.6s/5m20.0s
+commit_transfer      [  50% ] 550/550 VUs    2m40.6s/5m20.0s
+idempotency_replay   [  50% ] 450/450 VUs    2m40.6s/5m20.0s
+
+running (2m41.6s), 2500/2500 VUs, 116990 complete and 0 interrupted iterations
+browse_balance       [  51% ] 1500/1500 VUs  2m41.6s/5m20.0s
+commit_transfer      [  51% ] 550/550 VUs    2m41.6s/5m20.0s
+idempotency_replay   [  51% ] 450/450 VUs    2m41.6s/5m20.0s
+
+running (2m42.6s), 2500/2500 VUs, 117566 complete and 0 interrupted iterations
+browse_balance       [  51% ] 1500/1500 VUs  2m42.6s/5m20.0s
+commit_transfer      [  51% ] 550/550 VUs    2m42.6s/5m20.0s
+idempotency_replay   [  51% ] 450/450 VUs    2m42.6s/5m20.0s
+
+running (2m43.6s), 2500/2500 VUs, 118131 complete and 0 interrupted iterations
+browse_balance       [  51% ] 1500/1500 VUs  2m43.6s/5m20.0s
+commit_transfer      [  51% ] 550/550 VUs    2m43.6s/5m20.0s
+idempotency_replay   [  51% ] 450/450 VUs    2m43.6s/5m20.0s
+
+running (2m44.6s), 2500/2500 VUs, 118708 complete and 0 interrupted iterations
+browse_balance       [  51% ] 1500/1500 VUs  2m44.6s/5m20.0s
+commit_transfer      [  51% ] 550/550 VUs    2m44.6s/5m20.0s
+idempotency_replay   [  51% ] 450/450 VUs    2m44.6s/5m20.0s
+
+running (2m45.6s), 2500/2500 VUs, 119287 complete and 0 interrupted iterations
+browse_balance       [  52% ] 1500/1500 VUs  2m45.6s/5m20.0s
+commit_transfer      [  52% ] 550/550 VUs    2m45.6s/5m20.0s
+idempotency_replay   [  52% ] 450/450 VUs    2m45.6s/5m20.0s
+
+running (2m46.6s), 2500/2500 VUs, 119877 complete and 0 interrupted iterations
+browse_balance       [  52% ] 1500/1500 VUs  2m46.6s/5m20.0s
+commit_transfer      [  52% ] 550/550 VUs    2m46.6s/5m20.0s
+idempotency_replay   [  52% ] 450/450 VUs    2m46.6s/5m20.0s
+
+running (2m47.6s), 2500/2500 VUs, 120413 complete and 0 interrupted iterations
+browse_balance       [  52% ] 1500/1500 VUs  2m47.6s/5m20.0s
+commit_transfer      [  52% ] 550/550 VUs    2m47.6s/5m20.0s
+idempotency_replay   [  52% ] 450/450 VUs    2m47.6s/5m20.0s
+
+running (2m48.6s), 2500/2500 VUs, 120959 complete and 0 interrupted iterations
+browse_balance       [  53% ] 1500/1500 VUs  2m48.6s/5m20.0s
+commit_transfer      [  53% ] 550/550 VUs    2m48.6s/5m20.0s
+idempotency_replay   [  53% ] 450/450 VUs    2m48.6s/5m20.0s
+
+running (2m49.6s), 2500/2500 VUs, 121502 complete and 0 interrupted iterations
+browse_balance       [  53% ] 1500/1500 VUs  2m49.6s/5m20.0s
+commit_transfer      [  53% ] 550/550 VUs    2m49.6s/5m20.0s
+idempotency_replay   [  53% ] 450/450 VUs    2m49.6s/5m20.0s
+
+running (2m50.6s), 2500/2500 VUs, 122073 complete and 0 interrupted iterations
+browse_balance       [  53% ] 1500/1500 VUs  2m50.6s/5m20.0s
+commit_transfer      [  53% ] 550/550 VUs    2m50.6s/5m20.0s
+idempotency_replay   [  53% ] 450/450 VUs    2m50.6s/5m20.0s
+
+running (2m51.6s), 2500/2500 VUs, 122602 complete and 0 interrupted iterations
+browse_balance       [  54% ] 1500/1500 VUs  2m51.6s/5m20.0s
+commit_transfer      [  54% ] 550/550 VUs    2m51.6s/5m20.0s
+idempotency_replay   [  54% ] 450/450 VUs    2m51.6s/5m20.0s
+
+running (2m52.6s), 2500/2500 VUs, 123155 complete and 0 interrupted iterations
+browse_balance       [  54% ] 1500/1500 VUs  2m52.6s/5m20.0s
+commit_transfer      [  54% ] 550/550 VUs    2m52.6s/5m20.0s
+idempotency_replay   [  54% ] 450/450 VUs    2m52.6s/5m20.0s
+
+running (2m53.6s), 2500/2500 VUs, 123719 complete and 0 interrupted iterations
+browse_balance       [  54% ] 1500/1500 VUs  2m53.6s/5m20.0s
+commit_transfer      [  54% ] 550/550 VUs    2m53.6s/5m20.0s
+idempotency_replay   [  54% ] 450/450 VUs    2m53.6s/5m20.0s
+
+running (2m54.6s), 2500/2500 VUs, 124278 complete and 0 interrupted iterations
+browse_balance       [  55% ] 1500/1500 VUs  2m54.6s/5m20.0s
+commit_transfer      [  55% ] 550/550 VUs    2m54.6s/5m20.0s
+idempotency_replay   [  55% ] 450/450 VUs    2m54.6s/5m20.0s
+
+running (2m55.6s), 2500/2500 VUs, 124819 complete and 0 interrupted iterations
+browse_balance       [  55% ] 1500/1500 VUs  2m55.6s/5m20.0s
+commit_transfer      [  55% ] 550/550 VUs    2m55.6s/5m20.0s
+idempotency_replay   [  55% ] 450/450 VUs    2m55.6s/5m20.0s
+
+running (2m56.6s), 2500/2500 VUs, 125346 complete and 0 interrupted iterations
+browse_balance       [  55% ] 1500/1500 VUs  2m56.6s/5m20.0s
+commit_transfer      [  55% ] 550/550 VUs    2m56.6s/5m20.0s
+idempotency_replay   [  55% ] 450/450 VUs    2m56.6s/5m20.0s
+
+running (2m57.6s), 2500/2500 VUs, 125893 complete and 0 interrupted iterations
+browse_balance       [  56% ] 1500/1500 VUs  2m57.6s/5m20.0s
+commit_transfer      [  56% ] 550/550 VUs    2m57.6s/5m20.0s
+idempotency_replay   [  56% ] 450/450 VUs    2m57.6s/5m20.0s
+
+running (2m58.6s), 2500/2500 VUs, 126414 complete and 0 interrupted iterations
+browse_balance       [  56% ] 1500/1500 VUs  2m58.6s/5m20.0s
+commit_transfer      [  56% ] 550/550 VUs    2m58.6s/5m20.0s
+idempotency_replay   [  56% ] 450/450 VUs    2m58.6s/5m20.0s
+
+running (2m59.6s), 2500/2500 VUs, 126943 complete and 0 interrupted iterations
+browse_balance       [  56% ] 1500/1500 VUs  2m59.6s/5m20.0s
+commit_transfer      [  56% ] 550/550 VUs    2m59.6s/5m20.0s
+idempotency_replay   [  56% ] 450/450 VUs    2m59.6s/5m20.0s
+
+running (3m00.6s), 2500/2500 VUs, 127486 complete and 0 interrupted iterations
+browse_balance       [  56% ] 1500/1500 VUs  3m00.6s/5m20.0s
+commit_transfer      [  56% ] 550/550 VUs    3m00.6s/5m20.0s
+idempotency_replay   [  56% ] 450/450 VUs    3m00.6s/5m20.0s
+
+running (3m01.6s), 2500/2500 VUs, 127974 complete and 0 interrupted iterations
+browse_balance       [  57% ] 1500/1500 VUs  3m01.6s/5m20.0s
+commit_transfer      [  57% ] 550/550 VUs    3m01.6s/5m20.0s
+idempotency_replay   [  57% ] 450/450 VUs    3m01.6s/5m20.0s
+
+running (3m02.6s), 2500/2500 VUs, 128508 complete and 0 interrupted iterations
+browse_balance       [  57% ] 1500/1500 VUs  3m02.6s/5m20.0s
+commit_transfer      [  57% ] 550/550 VUs    3m02.6s/5m20.0s
+idempotency_replay   [  57% ] 450/450 VUs    3m02.6s/5m20.0s
+
+running (3m03.6s), 2500/2500 VUs, 128994 complete and 0 interrupted iterations
+browse_balance       [  57% ] 1500/1500 VUs  3m03.6s/5m20.0s
+commit_transfer      [  57% ] 550/550 VUs    3m03.6s/5m20.0s
+idempotency_replay   [  57% ] 450/450 VUs    3m03.6s/5m20.0s
+
+running (3m04.6s), 2500/2500 VUs, 129525 complete and 0 interrupted iterations
+browse_balance       [  58% ] 1500/1500 VUs  3m04.6s/5m20.0s
+commit_transfer      [  58% ] 550/550 VUs    3m04.6s/5m20.0s
+idempotency_replay   [  58% ] 450/450 VUs    3m04.6s/5m20.0s
+
+running (3m05.6s), 2500/2500 VUs, 130035 complete and 0 interrupted iterations
+browse_balance       [  58% ] 1500/1500 VUs  3m05.6s/5m20.0s
+commit_transfer      [  58% ] 550/550 VUs    3m05.6s/5m20.0s
+idempotency_replay   [  58% ] 450/450 VUs    3m05.6s/5m20.0s
+
+running (3m06.6s), 2500/2500 VUs, 130569 complete and 0 interrupted iterations
+browse_balance       [  58% ] 1500/1500 VUs  3m06.6s/5m20.0s
+commit_transfer      [  58% ] 550/550 VUs    3m06.6s/5m20.0s
+idempotency_replay   [  58% ] 450/450 VUs    3m06.6s/5m20.0s
+
+running (3m07.6s), 2500/2500 VUs, 131106 complete and 0 interrupted iterations
+browse_balance       [  59% ] 1500/1500 VUs  3m07.6s/5m20.0s
+commit_transfer      [  59% ] 550/550 VUs    3m07.6s/5m20.0s
+idempotency_replay   [  59% ] 450/450 VUs    3m07.6s/5m20.0s
+
+running (3m08.6s), 2500/2500 VUs, 131614 complete and 0 interrupted iterations
+browse_balance       [  59% ] 1500/1500 VUs  3m08.6s/5m20.0s
+commit_transfer      [  59% ] 550/550 VUs    3m08.6s/5m20.0s
+idempotency_replay   [  59% ] 450/450 VUs    3m08.6s/5m20.0s
+
+running (3m09.6s), 2500/2500 VUs, 132135 complete and 0 interrupted iterations
+browse_balance       [  59% ] 1500/1500 VUs  3m09.6s/5m20.0s
+commit_transfer      [  59% ] 550/550 VUs    3m09.6s/5m20.0s
+idempotency_replay   [  59% ] 450/450 VUs    3m09.6s/5m20.0s
+
+running (3m10.6s), 2500/2500 VUs, 132629 complete and 0 interrupted iterations
+browse_balance       [  60% ] 1500/1500 VUs  3m10.6s/5m20.0s
+commit_transfer      [  60% ] 550/550 VUs    3m10.6s/5m20.0s
+idempotency_replay   [  60% ] 450/450 VUs    3m10.6s/5m20.0s
+
+running (3m11.6s), 2500/2500 VUs, 133150 complete and 0 interrupted iterations
+browse_balance       [  60% ] 1500/1500 VUs  3m11.6s/5m20.0s
+commit_transfer      [  60% ] 550/550 VUs    3m11.6s/5m20.0s
+idempotency_replay   [  60% ] 450/450 VUs    3m11.6s/5m20.0s
+
+running (3m12.6s), 2500/2500 VUs, 133681 complete and 0 interrupted iterations
+browse_balance       [  60% ] 1500/1500 VUs  3m12.6s/5m20.0s
+commit_transfer      [  60% ] 550/550 VUs    3m12.6s/5m20.0s
+idempotency_replay   [  60% ] 450/450 VUs    3m12.6s/5m20.0s
+
+running (3m13.6s), 2500/2500 VUs, 134182 complete and 0 interrupted iterations
+browse_balance       [  61% ] 1500/1500 VUs  3m13.6s/5m20.0s
+commit_transfer      [  61% ] 550/550 VUs    3m13.6s/5m20.0s
+idempotency_replay   [  61% ] 450/450 VUs    3m13.6s/5m20.0s
+
+running (3m14.6s), 2500/2500 VUs, 134673 complete and 0 interrupted iterations
+browse_balance       [  61% ] 1500/1500 VUs  3m14.6s/5m20.0s
+commit_transfer      [  61% ] 550/550 VUs    3m14.6s/5m20.0s
+idempotency_replay   [  61% ] 450/450 VUs    3m14.6s/5m20.0s
+
+running (3m15.6s), 2500/2500 VUs, 135167 complete and 0 interrupted iterations
+browse_balance       [  61% ] 1500/1500 VUs  3m15.6s/5m20.0s
+commit_transfer      [  61% ] 550/550 VUs    3m15.6s/5m20.0s
+idempotency_replay   [  61% ] 450/450 VUs    3m15.6s/5m20.0s
+
+running (3m16.6s), 2500/2500 VUs, 135668 complete and 0 interrupted iterations
+browse_balance       [  61% ] 1500/1500 VUs  3m16.6s/5m20.0s
+commit_transfer      [  61% ] 550/550 VUs    3m16.6s/5m20.0s
+idempotency_replay   [  61% ] 450/450 VUs    3m16.6s/5m20.0s
+
+running (3m17.6s), 2500/2500 VUs, 136193 complete and 0 interrupted iterations
+browse_balance       [  62% ] 1500/1500 VUs  3m17.6s/5m20.0s
+commit_transfer      [  62% ] 550/550 VUs    3m17.6s/5m20.0s
+idempotency_replay   [  62% ] 450/450 VUs    3m17.6s/5m20.0s
+
+running (3m18.6s), 2500/2500 VUs, 136722 complete and 0 interrupted iterations
+browse_balance       [  62% ] 1500/1500 VUs  3m18.6s/5m20.0s
+commit_transfer      [  62% ] 550/550 VUs    3m18.6s/5m20.0s
+idempotency_replay   [  62% ] 450/450 VUs    3m18.6s/5m20.0s
+
+running (3m19.6s), 2500/2500 VUs, 137262 complete and 0 interrupted iterations
+browse_balance       [  62% ] 1500/1500 VUs  3m19.6s/5m20.0s
+commit_transfer      [  62% ] 550/550 VUs    3m19.6s/5m20.0s
+idempotency_replay   [  62% ] 450/450 VUs    3m19.6s/5m20.0s
+
+running (3m20.6s), 2500/2500 VUs, 137736 complete and 0 interrupted iterations
+browse_balance       [  63% ] 1500/1500 VUs  3m20.6s/5m20.0s
+commit_transfer      [  63% ] 550/550 VUs    3m20.6s/5m20.0s
+idempotency_replay   [  63% ] 450/450 VUs    3m20.6s/5m20.0s
+
+running (3m21.6s), 2500/2500 VUs, 138219 complete and 0 interrupted iterations
+browse_balance       [  63% ] 1500/1500 VUs  3m21.6s/5m20.0s
+commit_transfer      [  63% ] 550/550 VUs    3m21.6s/5m20.0s
+idempotency_replay   [  63% ] 450/450 VUs    3m21.6s/5m20.0s
+
+running (3m22.6s), 2500/2500 VUs, 138720 complete and 0 interrupted iterations
+browse_balance       [  63% ] 1500/1500 VUs  3m22.6s/5m20.0s
+commit_transfer      [  63% ] 550/550 VUs    3m22.6s/5m20.0s
+idempotency_replay   [  63% ] 450/450 VUs    3m22.6s/5m20.0s
+
+running (3m23.6s), 2500/2500 VUs, 139228 complete and 0 interrupted iterations
+browse_balance       [  64% ] 1500/1500 VUs  3m23.6s/5m20.0s
+commit_transfer      [  64% ] 550/550 VUs    3m23.6s/5m20.0s
+idempotency_replay   [  64% ] 450/450 VUs    3m23.6s/5m20.0s
+
+running (3m24.6s), 2500/2500 VUs, 139721 complete and 0 interrupted iterations
+browse_balance       [  64% ] 1500/1500 VUs  3m24.6s/5m20.0s
+commit_transfer      [  64% ] 550/550 VUs    3m24.6s/5m20.0s
+idempotency_replay   [  64% ] 450/450 VUs    3m24.6s/5m20.0s
+
+running (3m25.6s), 2500/2500 VUs, 140206 complete and 0 interrupted iterations
+browse_balance       [  64% ] 1500/1500 VUs  3m25.6s/5m20.0s
+commit_transfer      [  64% ] 550/550 VUs    3m25.6s/5m20.0s
+idempotency_replay   [  64% ] 450/450 VUs    3m25.6s/5m20.0s
+
+running (3m26.6s), 2500/2500 VUs, 140725 complete and 0 interrupted iterations
+browse_balance       [  65% ] 1500/1500 VUs  3m26.6s/5m20.0s
+commit_transfer      [  65% ] 550/550 VUs    3m26.6s/5m20.0s
+idempotency_replay   [  65% ] 450/450 VUs    3m26.6s/5m20.0s
+
+running (3m27.6s), 2500/2500 VUs, 141219 complete and 0 interrupted iterations
+browse_balance       [  65% ] 1500/1500 VUs  3m27.6s/5m20.0s
+commit_transfer      [  65% ] 550/550 VUs    3m27.6s/5m20.0s
+idempotency_replay   [  65% ] 450/450 VUs    3m27.6s/5m20.0s
+
+running (3m28.6s), 2500/2500 VUs, 141691 complete and 0 interrupted iterations
+browse_balance       [  65% ] 1500/1500 VUs  3m28.6s/5m20.0s
+commit_transfer      [  65% ] 550/550 VUs    3m28.6s/5m20.0s
+idempotency_replay   [  65% ] 450/450 VUs    3m28.6s/5m20.0s
+
+running (3m29.6s), 2500/2500 VUs, 142152 complete and 0 interrupted iterations
+browse_balance       [  66% ] 1500/1500 VUs  3m29.6s/5m20.0s
+commit_transfer      [  66% ] 550/550 VUs    3m29.6s/5m20.0s
+idempotency_replay   [  66% ] 450/450 VUs    3m29.6s/5m20.0s
+
+running (3m30.6s), 2500/2500 VUs, 142626 complete and 0 interrupted iterations
+browse_balance       [  66% ] 1500/1500 VUs  3m30.6s/5m20.0s
+commit_transfer      [  66% ] 550/550 VUs    3m30.6s/5m20.0s
+idempotency_replay   [  66% ] 450/450 VUs    3m30.6s/5m20.0s
+
+running (3m31.6s), 2500/2500 VUs, 143101 complete and 0 interrupted iterations
+browse_balance       [  66% ] 1500/1500 VUs  3m31.6s/5m20.0s
+commit_transfer      [  66% ] 550/550 VUs    3m31.6s/5m20.0s
+idempotency_replay   [  66% ] 450/450 VUs    3m31.6s/5m20.0s
+
+running (3m32.6s), 2500/2500 VUs, 143607 complete and 0 interrupted iterations
+browse_balance       [  66% ] 1500/1500 VUs  3m32.6s/5m20.0s
+commit_transfer      [  66% ] 550/550 VUs    3m32.6s/5m20.0s
+idempotency_replay   [  66% ] 450/450 VUs    3m32.6s/5m20.0s
+
+running (3m33.6s), 2500/2500 VUs, 144079 complete and 0 interrupted iterations
+browse_balance       [  67% ] 1500/1500 VUs  3m33.6s/5m20.0s
+commit_transfer      [  67% ] 550/550 VUs    3m33.6s/5m20.0s
+idempotency_replay   [  67% ] 450/450 VUs    3m33.6s/5m20.0s
+
+running (3m34.6s), 2500/2500 VUs, 144543 complete and 0 interrupted iterations
+browse_balance       [  67% ] 1500/1500 VUs  3m34.6s/5m20.0s
+commit_transfer      [  67% ] 550/550 VUs    3m34.6s/5m20.0s
+idempotency_replay   [  67% ] 450/450 VUs    3m34.6s/5m20.0s
+
+running (3m35.6s), 2500/2500 VUs, 145006 complete and 0 interrupted iterations
+browse_balance       [  67% ] 1500/1500 VUs  3m35.6s/5m20.0s
+commit_transfer      [  67% ] 550/550 VUs    3m35.6s/5m20.0s
+idempotency_replay   [  67% ] 450/450 VUs    3m35.6s/5m20.0s
+
+running (3m36.6s), 2500/2500 VUs, 145496 complete and 0 interrupted iterations
+browse_balance       [  68% ] 1500/1500 VUs  3m36.6s/5m20.0s
+commit_transfer      [  68% ] 550/550 VUs    3m36.6s/5m20.0s
+idempotency_replay   [  68% ] 450/450 VUs    3m36.6s/5m20.0s
+
+running (3m37.6s), 2500/2500 VUs, 145959 complete and 0 interrupted iterations
+browse_balance       [  68% ] 1500/1500 VUs  3m37.6s/5m20.0s
+commit_transfer      [  68% ] 550/550 VUs    3m37.6s/5m20.0s
+idempotency_replay   [  68% ] 450/450 VUs    3m37.6s/5m20.0s
+
+running (3m38.6s), 2500/2500 VUs, 146423 complete and 0 interrupted iterations
+browse_balance       [  68% ] 1500/1500 VUs  3m38.6s/5m20.0s
+commit_transfer      [  68% ] 550/550 VUs    3m38.6s/5m20.0s
+idempotency_replay   [  68% ] 450/450 VUs    3m38.6s/5m20.0s
+
+running (3m39.6s), 2500/2500 VUs, 146907 complete and 0 interrupted iterations
+browse_balance       [  69% ] 1500/1500 VUs  3m39.6s/5m20.0s
+commit_transfer      [  69% ] 550/550 VUs    3m39.6s/5m20.0s
+idempotency_replay   [  69% ] 450/450 VUs    3m39.6s/5m20.0s
+
+running (3m40.6s), 2500/2500 VUs, 147372 complete and 0 interrupted iterations
+browse_balance       [  69% ] 1500/1500 VUs  3m40.6s/5m20.0s
+commit_transfer      [  69% ] 550/550 VUs    3m40.6s/5m20.0s
+idempotency_replay   [  69% ] 450/450 VUs    3m40.6s/5m20.0s
+
+running (3m41.6s), 2500/2500 VUs, 147884 complete and 0 interrupted iterations
+browse_balance       [  69% ] 1500/1500 VUs  3m41.6s/5m20.0s
+commit_transfer      [  69% ] 550/550 VUs    3m41.6s/5m20.0s
+idempotency_replay   [  69% ] 450/450 VUs    3m41.6s/5m20.0s
+
+running (3m42.6s), 2500/2500 VUs, 148315 complete and 0 interrupted iterations
+browse_balance       [  70% ] 1500/1500 VUs  3m42.6s/5m20.0s
+commit_transfer      [  70% ] 550/550 VUs    3m42.6s/5m20.0s
+idempotency_replay   [  70% ] 450/450 VUs    3m42.6s/5m20.0s
+
+running (3m43.6s), 2500/2500 VUs, 148781 complete and 0 interrupted iterations
+browse_balance       [  70% ] 1500/1500 VUs  3m43.6s/5m20.0s
+commit_transfer      [  70% ] 550/550 VUs    3m43.6s/5m20.0s
+idempotency_replay   [  70% ] 450/450 VUs    3m43.6s/5m20.0s
+
+running (3m44.6s), 2500/2500 VUs, 149254 complete and 0 interrupted iterations
+browse_balance       [  70% ] 1500/1500 VUs  3m44.6s/5m20.0s
+commit_transfer      [  70% ] 550/550 VUs    3m44.6s/5m20.0s
+idempotency_replay   [  70% ] 450/450 VUs    3m44.6s/5m20.0s
+
+running (3m45.6s), 2500/2500 VUs, 149762 complete and 0 interrupted iterations
+browse_balance       [  71% ] 1500/1500 VUs  3m45.6s/5m20.0s
+commit_transfer      [  71% ] 550/550 VUs    3m45.6s/5m20.0s
+idempotency_replay   [  71% ] 450/450 VUs    3m45.6s/5m20.0s
+
+running (3m46.6s), 2500/2500 VUs, 150227 complete and 0 interrupted iterations
+browse_balance       [  71% ] 1500/1500 VUs  3m46.6s/5m20.0s
+commit_transfer      [  71% ] 550/550 VUs    3m46.6s/5m20.0s
+idempotency_replay   [  71% ] 450/450 VUs    3m46.6s/5m20.0s
+
+running (3m47.6s), 2500/2500 VUs, 150722 complete and 0 interrupted iterations
+browse_balance       [  71% ] 1500/1500 VUs  3m47.6s/5m20.0s
+commit_transfer      [  71% ] 550/550 VUs    3m47.6s/5m20.0s
+idempotency_replay   [  71% ] 450/450 VUs    3m47.6s/5m20.0s
+
+running (3m48.6s), 2500/2500 VUs, 151173 complete and 0 interrupted iterations
+browse_balance       [  71% ] 1500/1500 VUs  3m48.6s/5m20.0s
+commit_transfer      [  71% ] 550/550 VUs    3m48.6s/5m20.0s
+idempotency_replay   [  71% ] 450/450 VUs    3m48.6s/5m20.0s
+
+running (3m49.6s), 2500/2500 VUs, 151643 complete and 0 interrupted iterations
+browse_balance       [  72% ] 1500/1500 VUs  3m49.6s/5m20.0s
+commit_transfer      [  72% ] 550/550 VUs    3m49.6s/5m20.0s
+idempotency_replay   [  72% ] 450/450 VUs    3m49.6s/5m20.0s
+
+running (3m50.6s), 2500/2500 VUs, 152131 complete and 0 interrupted iterations
+browse_balance       [  72% ] 1500/1500 VUs  3m50.6s/5m20.0s
+commit_transfer      [  72% ] 550/550 VUs    3m50.6s/5m20.0s
+idempotency_replay   [  72% ] 450/450 VUs    3m50.6s/5m20.0s
+
+running (3m51.6s), 2500/2500 VUs, 152620 complete and 0 interrupted iterations
+browse_balance       [  72% ] 1500/1500 VUs  3m51.6s/5m20.0s
+commit_transfer      [  72% ] 550/550 VUs    3m51.6s/5m20.0s
+idempotency_replay   [  72% ] 450/450 VUs    3m51.6s/5m20.0s
+
+running (3m52.6s), 2500/2500 VUs, 153101 complete and 0 interrupted iterations
+browse_balance       [  73% ] 1500/1500 VUs  3m52.6s/5m20.0s
+commit_transfer      [  73% ] 550/550 VUs    3m52.6s/5m20.0s
+idempotency_replay   [  73% ] 450/450 VUs    3m52.6s/5m20.0s
+
+running (3m53.6s), 2500/2500 VUs, 153588 complete and 0 interrupted iterations
+browse_balance       [  73% ] 1500/1500 VUs  3m53.6s/5m20.0s
+commit_transfer      [  73% ] 550/550 VUs    3m53.6s/5m20.0s
+idempotency_replay   [  73% ] 450/450 VUs    3m53.6s/5m20.0s
+
+running (3m54.6s), 2500/2500 VUs, 154060 complete and 0 interrupted iterations
+browse_balance       [  73% ] 1500/1500 VUs  3m54.6s/5m20.0s
+commit_transfer      [  73% ] 550/550 VUs    3m54.6s/5m20.0s
+idempotency_replay   [  73% ] 450/450 VUs    3m54.6s/5m20.0s
+
+running (3m55.6s), 2500/2500 VUs, 154534 complete and 0 interrupted iterations
+browse_balance       [  74% ] 1500/1500 VUs  3m55.6s/5m20.0s
+commit_transfer      [  74% ] 550/550 VUs    3m55.6s/5m20.0s
+idempotency_replay   [  74% ] 450/450 VUs    3m55.6s/5m20.0s
+
+running (3m56.6s), 2500/2500 VUs, 155025 complete and 0 interrupted iterations
+browse_balance       [  74% ] 1500/1500 VUs  3m56.6s/5m20.0s
+commit_transfer      [  74% ] 550/550 VUs    3m56.6s/5m20.0s
+idempotency_replay   [  74% ] 450/450 VUs    3m56.6s/5m20.0s
+
+running (3m57.6s), 2500/2500 VUs, 155491 complete and 0 interrupted iterations
+browse_balance       [  74% ] 1500/1500 VUs  3m57.6s/5m20.0s
+commit_transfer      [  74% ] 550/550 VUs    3m57.6s/5m20.0s
+idempotency_replay   [  74% ] 450/450 VUs    3m57.6s/5m20.0s
+
+running (3m58.6s), 2500/2500 VUs, 155964 complete and 0 interrupted iterations
+browse_balance       [  75% ] 1500/1500 VUs  3m58.6s/5m20.0s
+commit_transfer      [  75% ] 550/550 VUs    3m58.6s/5m20.0s
+idempotency_replay   [  75% ] 450/450 VUs    3m58.6s/5m20.0s
+
+running (3m59.6s), 2500/2500 VUs, 156472 complete and 0 interrupted iterations
+browse_balance       [  75% ] 1500/1500 VUs  3m59.6s/5m20.0s
+commit_transfer      [  75% ] 550/550 VUs    3m59.6s/5m20.0s
+idempotency_replay   [  75% ] 450/450 VUs    3m59.6s/5m20.0s
+
+running (4m00.6s), 2500/2500 VUs, 156931 complete and 0 interrupted iterations
+browse_balance       [  75% ] 1500/1500 VUs  4m00.6s/5m20.0s
+commit_transfer      [  75% ] 550/550 VUs    4m00.6s/5m20.0s
+idempotency_replay   [  75% ] 450/450 VUs    4m00.6s/5m20.0s
+
+running (4m01.6s), 2500/2500 VUs, 157413 complete and 0 interrupted iterations
+browse_balance       [  76% ] 1500/1500 VUs  4m01.6s/5m20.0s
+commit_transfer      [  76% ] 550/550 VUs    4m01.6s/5m20.0s
+idempotency_replay   [  76% ] 450/450 VUs    4m01.6s/5m20.0s
+
+running (4m02.6s), 2500/2500 VUs, 157841 complete and 0 interrupted iterations
+browse_balance       [  76% ] 1500/1500 VUs  4m02.6s/5m20.0s
+commit_transfer      [  76% ] 550/550 VUs    4m02.6s/5m20.0s
+idempotency_replay   [  76% ] 450/450 VUs    4m02.6s/5m20.0s
+
+running (4m03.6s), 2500/2500 VUs, 158320 complete and 0 interrupted iterations
+browse_balance       [  76% ] 1500/1500 VUs  4m03.6s/5m20.0s
+commit_transfer      [  76% ] 550/550 VUs    4m03.6s/5m20.0s
+idempotency_replay   [  76% ] 450/450 VUs    4m03.6s/5m20.0s
+
+running (4m04.6s), 2500/2500 VUs, 158792 complete and 0 interrupted iterations
+browse_balance       [  76% ] 1500/1500 VUs  4m04.6s/5m20.0s
+commit_transfer      [  76% ] 550/550 VUs    4m04.6s/5m20.0s
+idempotency_replay   [  76% ] 450/450 VUs    4m04.6s/5m20.0s
+
+running (4m05.6s), 2500/2500 VUs, 159253 complete and 0 interrupted iterations
+browse_balance       [  77% ] 1500/1500 VUs  4m05.6s/5m20.0s
+commit_transfer      [  77% ] 550/550 VUs    4m05.6s/5m20.0s
+idempotency_replay   [  77% ] 450/450 VUs    4m05.6s/5m20.0s
+
+running (4m06.6s), 2500/2500 VUs, 159698 complete and 0 interrupted iterations
+browse_balance       [  77% ] 1500/1500 VUs  4m06.6s/5m20.0s
+commit_transfer      [  77% ] 550/550 VUs    4m06.6s/5m20.0s
+idempotency_replay   [  77% ] 450/450 VUs    4m06.6s/5m20.0s
+
+running (4m07.6s), 2500/2500 VUs, 160155 complete and 0 interrupted iterations
+browse_balance       [  77% ] 1500/1500 VUs  4m07.6s/5m20.0s
+commit_transfer      [  77% ] 550/550 VUs    4m07.6s/5m20.0s
+idempotency_replay   [  77% ] 450/450 VUs    4m07.6s/5m20.0s
+
+running (4m08.6s), 2500/2500 VUs, 160615 complete and 0 interrupted iterations
+browse_balance       [  78% ] 1500/1500 VUs  4m08.6s/5m20.0s
+commit_transfer      [  78% ] 550/550 VUs    4m08.6s/5m20.0s
+idempotency_replay   [  78% ] 450/450 VUs    4m08.6s/5m20.0s
+
+running (4m09.6s), 2500/2500 VUs, 161094 complete and 0 interrupted iterations
+browse_balance       [  78% ] 1500/1500 VUs  4m09.6s/5m20.0s
+commit_transfer      [  78% ] 550/550 VUs    4m09.6s/5m20.0s
+idempotency_replay   [  78% ] 450/450 VUs    4m09.6s/5m20.0s
+
+running (4m10.6s), 2500/2500 VUs, 161556 complete and 0 interrupted iterations
+browse_balance       [  78% ] 1500/1500 VUs  4m10.6s/5m20.0s
+commit_transfer      [  78% ] 550/550 VUs    4m10.6s/5m20.0s
+idempotency_replay   [  78% ] 450/450 VUs    4m10.6s/5m20.0s
+
+running (4m11.6s), 2500/2500 VUs, 162049 complete and 0 interrupted iterations
+browse_balance       [  79% ] 1500/1500 VUs  4m11.6s/5m20.0s
+commit_transfer      [  79% ] 550/550 VUs    4m11.6s/5m20.0s
+idempotency_replay   [  79% ] 450/450 VUs    4m11.6s/5m20.0s
+
+running (4m12.6s), 2500/2500 VUs, 162507 complete and 0 interrupted iterations
+browse_balance       [  79% ] 1500/1500 VUs  4m12.6s/5m20.0s
+commit_transfer      [  79% ] 550/550 VUs    4m12.6s/5m20.0s
+idempotency_replay   [  79% ] 450/450 VUs    4m12.6s/5m20.0s
+
+running (4m13.6s), 2500/2500 VUs, 162940 complete and 0 interrupted iterations
+browse_balance       [  79% ] 1500/1500 VUs  4m13.6s/5m20.0s
+commit_transfer      [  79% ] 550/550 VUs    4m13.6s/5m20.0s
+idempotency_replay   [  79% ] 450/450 VUs    4m13.6s/5m20.0s
+
+running (4m14.6s), 2500/2500 VUs, 163392 complete and 0 interrupted iterations
+browse_balance       [  80% ] 1500/1500 VUs  4m14.6s/5m20.0s
+commit_transfer      [  80% ] 550/550 VUs    4m14.6s/5m20.0s
+idempotency_replay   [  80% ] 450/450 VUs    4m14.6s/5m20.0s
+
+running (4m15.6s), 2500/2500 VUs, 163840 complete and 0 interrupted iterations
+browse_balance       [  80% ] 1500/1500 VUs  4m15.6s/5m20.0s
+commit_transfer      [  80% ] 550/550 VUs    4m15.6s/5m20.0s
+idempotency_replay   [  80% ] 450/450 VUs    4m15.6s/5m20.0s
+
+running (4m16.6s), 2500/2500 VUs, 164302 complete and 0 interrupted iterations
+browse_balance       [  80% ] 1500/1500 VUs  4m16.6s/5m20.0s
+commit_transfer      [  80% ] 550/550 VUs    4m16.6s/5m20.0s
+idempotency_replay   [  80% ] 450/450 VUs    4m16.6s/5m20.0s
+
+running (4m17.6s), 2500/2500 VUs, 164714 complete and 0 interrupted iterations
+browse_balance       [  81% ] 1500/1500 VUs  4m17.6s/5m20.0s
+commit_transfer      [  81% ] 550/550 VUs    4m17.6s/5m20.0s
+idempotency_replay   [  81% ] 450/450 VUs    4m17.6s/5m20.0s
+
+running (4m18.6s), 2500/2500 VUs, 165178 complete and 0 interrupted iterations
+browse_balance       [  81% ] 1500/1500 VUs  4m18.6s/5m20.0s
+commit_transfer      [  81% ] 550/550 VUs    4m18.6s/5m20.0s
+idempotency_replay   [  81% ] 450/450 VUs    4m18.6s/5m20.0s
+
+running (4m19.6s), 2500/2500 VUs, 165634 complete and 0 interrupted iterations
+browse_balance       [  81% ] 1500/1500 VUs  4m19.6s/5m20.0s
+commit_transfer      [  81% ] 550/550 VUs    4m19.6s/5m20.0s
+idempotency_replay   [  81% ] 450/450 VUs    4m19.6s/5m20.0s
+
+running (4m20.6s), 2500/2500 VUs, 166078 complete and 0 interrupted iterations
+browse_balance       [  81% ] 1500/1500 VUs  4m20.6s/5m20.0s
+commit_transfer      [  81% ] 550/550 VUs    4m20.6s/5m20.0s
+idempotency_replay   [  81% ] 450/450 VUs    4m20.6s/5m20.0s
+
+running (4m21.6s), 2500/2500 VUs, 166531 complete and 0 interrupted iterations
+browse_balance       [  82% ] 1500/1500 VUs  4m21.6s/5m20.0s
+commit_transfer      [  82% ] 550/550 VUs    4m21.6s/5m20.0s
+idempotency_replay   [  82% ] 450/450 VUs    4m21.6s/5m20.0s
+
+running (4m22.6s), 2500/2500 VUs, 166974 complete and 0 interrupted iterations
+browse_balance       [  82% ] 1500/1500 VUs  4m22.6s/5m20.0s
+commit_transfer      [  82% ] 550/550 VUs    4m22.6s/5m20.0s
+idempotency_replay   [  82% ] 450/450 VUs    4m22.6s/5m20.0s
+
+running (4m23.6s), 2500/2500 VUs, 167450 complete and 0 interrupted iterations
+browse_balance       [  82% ] 1500/1500 VUs  4m23.6s/5m20.0s
+commit_transfer      [  82% ] 550/550 VUs    4m23.6s/5m20.0s
+idempotency_replay   [  82% ] 450/450 VUs    4m23.6s/5m20.0s
+
+running (4m24.6s), 2500/2500 VUs, 167888 complete and 0 interrupted iterations
+browse_balance       [  83% ] 1500/1500 VUs  4m24.6s/5m20.0s
+commit_transfer      [  83% ] 550/550 VUs    4m24.6s/5m20.0s
+idempotency_replay   [  83% ] 450/450 VUs    4m24.6s/5m20.0s
+
+running (4m25.6s), 2500/2500 VUs, 168296 complete and 0 interrupted iterations
+browse_balance       [  83% ] 1500/1500 VUs  4m25.6s/5m20.0s
+commit_transfer      [  83% ] 550/550 VUs    4m25.6s/5m20.0s
+idempotency_replay   [  83% ] 450/450 VUs    4m25.6s/5m20.0s
+
+running (4m26.6s), 2500/2500 VUs, 168726 complete and 0 interrupted iterations
+browse_balance       [  83% ] 1500/1500 VUs  4m26.6s/5m20.0s
+commit_transfer      [  83% ] 550/550 VUs    4m26.6s/5m20.0s
+idempotency_replay   [  83% ] 450/450 VUs    4m26.6s/5m20.0s
+
+running (4m27.6s), 2500/2500 VUs, 169189 complete and 0 interrupted iterations
+browse_balance       [  84% ] 1500/1500 VUs  4m27.6s/5m20.0s
+commit_transfer      [  84% ] 550/550 VUs    4m27.6s/5m20.0s
+idempotency_replay   [  84% ] 450/450 VUs    4m27.6s/5m20.0s
+
+running (4m28.6s), 2500/2500 VUs, 169629 complete and 0 interrupted iterations
+browse_balance       [  84% ] 1500/1500 VUs  4m28.6s/5m20.0s
+commit_transfer      [  84% ] 550/550 VUs    4m28.6s/5m20.0s
+idempotency_replay   [  84% ] 450/450 VUs    4m28.6s/5m20.0s
+
+running (4m29.6s), 2500/2500 VUs, 170054 complete and 0 interrupted iterations
+browse_balance       [  84% ] 1500/1500 VUs  4m29.6s/5m20.0s
+commit_transfer      [  84% ] 550/550 VUs    4m29.6s/5m20.0s
+idempotency_replay   [  84% ] 450/450 VUs    4m29.6s/5m20.0s
+
+running (4m30.6s), 2500/2500 VUs, 170503 complete and 0 interrupted iterations
+browse_balance       [  85% ] 1500/1500 VUs  4m30.6s/5m20.0s
+commit_transfer      [  85% ] 550/550 VUs    4m30.6s/5m20.0s
+idempotency_replay   [  85% ] 450/450 VUs    4m30.6s/5m20.0s
+
+running (4m31.6s), 2500/2500 VUs, 170952 complete and 0 interrupted iterations
+browse_balance       [  85% ] 1500/1500 VUs  4m31.6s/5m20.0s
+commit_transfer      [  85% ] 550/550 VUs    4m31.6s/5m20.0s
+idempotency_replay   [  85% ] 450/450 VUs    4m31.6s/5m20.0s
+
+running (4m32.6s), 2500/2500 VUs, 171384 complete and 0 interrupted iterations
+browse_balance       [  85% ] 1500/1500 VUs  4m32.6s/5m20.0s
+commit_transfer      [  85% ] 550/550 VUs    4m32.6s/5m20.0s
+idempotency_replay   [  85% ] 450/450 VUs    4m32.6s/5m20.0s
+
+running (4m33.6s), 2500/2500 VUs, 171827 complete and 0 interrupted iterations
+browse_balance       [  86% ] 1500/1500 VUs  4m33.6s/5m20.0s
+commit_transfer      [  86% ] 550/550 VUs    4m33.6s/5m20.0s
+idempotency_replay   [  86% ] 450/450 VUs    4m33.6s/5m20.0s
+
+running (4m34.6s), 2500/2500 VUs, 172235 complete and 0 interrupted iterations
+browse_balance       [  86% ] 1500/1500 VUs  4m34.6s/5m20.0s
+commit_transfer      [  86% ] 550/550 VUs    4m34.6s/5m20.0s
+idempotency_replay   [  86% ] 450/450 VUs    4m34.6s/5m20.0s
+
+running (4m35.6s), 2500/2500 VUs, 172641 complete and 0 interrupted iterations
+browse_balance       [  86% ] 1500/1500 VUs  4m35.6s/5m20.0s
+commit_transfer      [  86% ] 550/550 VUs    4m35.6s/5m20.0s
+idempotency_replay   [  86% ] 450/450 VUs    4m35.6s/5m20.0s
+
+running (4m36.6s), 2500/2500 VUs, 173051 complete and 0 interrupted iterations
+browse_balance       [  86% ] 1500/1500 VUs  4m36.6s/5m20.0s
+commit_transfer      [  86% ] 550/550 VUs    4m36.6s/5m20.0s
+idempotency_replay   [  86% ] 450/450 VUs    4m36.6s/5m20.0s
+
+running (4m37.6s), 2500/2500 VUs, 173477 complete and 0 interrupted iterations
+browse_balance       [  87% ] 1500/1500 VUs  4m37.6s/5m20.0s
+commit_transfer      [  87% ] 550/550 VUs    4m37.6s/5m20.0s
+idempotency_replay   [  87% ] 450/450 VUs    4m37.6s/5m20.0s
+
+running (4m38.6s), 2500/2500 VUs, 173909 complete and 0 interrupted iterations
+browse_balance       [  87% ] 1500/1500 VUs  4m38.6s/5m20.0s
+commit_transfer      [  87% ] 550/550 VUs    4m38.6s/5m20.0s
+idempotency_replay   [  87% ] 450/450 VUs    4m38.6s/5m20.0s
+
+running (4m39.6s), 2500/2500 VUs, 174358 complete and 0 interrupted iterations
+browse_balance       [  87% ] 1500/1500 VUs  4m39.6s/5m20.0s
+commit_transfer      [  87% ] 550/550 VUs    4m39.6s/5m20.0s
+idempotency_replay   [  87% ] 450/450 VUs    4m39.6s/5m20.0s
+
+running (4m40.6s), 2500/2500 VUs, 174782 complete and 0 interrupted iterations
+browse_balance       [  88% ] 1500/1500 VUs  4m40.6s/5m20.0s
+commit_transfer      [  88% ] 550/550 VUs    4m40.6s/5m20.0s
+idempotency_replay   [  88% ] 450/450 VUs    4m40.6s/5m20.0s
+
+running (4m41.6s), 2500/2500 VUs, 175218 complete and 0 interrupted iterations
+browse_balance       [  88% ] 1500/1500 VUs  4m41.6s/5m20.0s
+commit_transfer      [  88% ] 550/550 VUs    4m41.6s/5m20.0s
+idempotency_replay   [  88% ] 450/450 VUs    4m41.6s/5m20.0s
+
+running (4m42.6s), 2500/2500 VUs, 175610 complete and 0 interrupted iterations
+browse_balance       [  88% ] 1500/1500 VUs  4m42.6s/5m20.0s
+commit_transfer      [  88% ] 550/550 VUs    4m42.6s/5m20.0s
+idempotency_replay   [  88% ] 450/450 VUs    4m42.6s/5m20.0s
+
+running (4m43.6s), 2500/2500 VUs, 176038 complete and 0 interrupted iterations
+browse_balance       [  89% ] 1500/1500 VUs  4m43.6s/5m20.0s
+commit_transfer      [  89% ] 550/550 VUs    4m43.6s/5m20.0s
+idempotency_replay   [  89% ] 450/450 VUs    4m43.6s/5m20.0s
+
+running (4m44.6s), 2500/2500 VUs, 176497 complete and 0 interrupted iterations
+browse_balance       [  89% ] 1500/1500 VUs  4m44.6s/5m20.0s
+commit_transfer      [  89% ] 550/550 VUs    4m44.6s/5m20.0s
+idempotency_replay   [  89% ] 450/450 VUs    4m44.6s/5m20.0s
+
+running (4m45.6s), 2500/2500 VUs, 176922 complete and 0 interrupted iterations
+browse_balance       [  89% ] 1500/1500 VUs  4m45.6s/5m20.0s
+commit_transfer      [  89% ] 550/550 VUs    4m45.6s/5m20.0s
+idempotency_replay   [  89% ] 450/450 VUs    4m45.6s/5m20.0s
+
+running (4m46.6s), 2500/2500 VUs, 177335 complete and 0 interrupted iterations
+browse_balance       [  90% ] 1500/1500 VUs  4m46.6s/5m20.0s
+commit_transfer      [  90% ] 550/550 VUs    4m46.6s/5m20.0s
+idempotency_replay   [  90% ] 450/450 VUs    4m46.6s/5m20.0s
+
+running (4m47.6s), 2500/2500 VUs, 177758 complete and 0 interrupted iterations
+browse_balance       [  90% ] 1500/1500 VUs  4m47.6s/5m20.0s
+commit_transfer      [  90% ] 550/550 VUs    4m47.6s/5m20.0s
+idempotency_replay   [  90% ] 450/450 VUs    4m47.6s/5m20.0s
+
+running (4m48.6s), 2500/2500 VUs, 178176 complete and 0 interrupted iterations
+browse_balance       [  90% ] 1500/1500 VUs  4m48.6s/5m20.0s
+commit_transfer      [  90% ] 550/550 VUs    4m48.6s/5m20.0s
+idempotency_replay   [  90% ] 450/450 VUs    4m48.6s/5m20.0s
+
+running (4m49.6s), 2500/2500 VUs, 178571 complete and 0 interrupted iterations
+browse_balance       [  91% ] 1500/1500 VUs  4m49.6s/5m20.0s
+commit_transfer      [  91% ] 550/550 VUs    4m49.6s/5m20.0s
+idempotency_replay   [  91% ] 450/450 VUs    4m49.6s/5m20.0s
+
+running (4m50.6s), 2500/2500 VUs, 179038 complete and 0 interrupted iterations
+browse_balance       [  91% ] 1500/1500 VUs  4m50.6s/5m20.0s
+commit_transfer      [  91% ] 550/550 VUs    4m50.6s/5m20.0s
+idempotency_replay   [  91% ] 450/450 VUs    4m50.6s/5m20.0s
+
+running (4m51.6s), 2500/2500 VUs, 179453 complete and 0 interrupted iterations
+browse_balance       [  91% ] 1500/1500 VUs  4m51.6s/5m20.0s
+commit_transfer      [  91% ] 550/550 VUs    4m51.6s/5m20.0s
+idempotency_replay   [  91% ] 450/450 VUs    4m51.6s/5m20.0s
+
+running (4m52.6s), 2500/2500 VUs, 179880 complete and 0 interrupted iterations
+browse_balance       [  91% ] 1500/1500 VUs  4m52.6s/5m20.0s
+commit_transfer      [  91% ] 550/550 VUs    4m52.6s/5m20.0s
+idempotency_replay   [  91% ] 450/450 VUs    4m52.6s/5m20.0s
+
+running (4m53.6s), 2500/2500 VUs, 180314 complete and 0 interrupted iterations
+browse_balance       [  92% ] 1500/1500 VUs  4m53.6s/5m20.0s
+commit_transfer      [  92% ] 550/550 VUs    4m53.6s/5m20.0s
+idempotency_replay   [  92% ] 450/450 VUs    4m53.6s/5m20.0s
+
+running (4m54.6s), 2500/2500 VUs, 180751 complete and 0 interrupted iterations
+browse_balance       [  92% ] 1500/1500 VUs  4m54.6s/5m20.0s
+commit_transfer      [  92% ] 550/550 VUs    4m54.6s/5m20.0s
+idempotency_replay   [  92% ] 450/450 VUs    4m54.6s/5m20.0s
+
+running (4m55.6s), 2500/2500 VUs, 181167 complete and 0 interrupted iterations
+browse_balance       [  92% ] 1500/1500 VUs  4m55.6s/5m20.0s
+commit_transfer      [  92% ] 550/550 VUs    4m55.6s/5m20.0s
+idempotency_replay   [  92% ] 450/450 VUs    4m55.6s/5m20.0s
+
+running (4m56.6s), 2500/2500 VUs, 181547 complete and 0 interrupted iterations
+browse_balance       [  93% ] 1500/1500 VUs  4m56.6s/5m20.0s
+commit_transfer      [  93% ] 550/550 VUs    4m56.6s/5m20.0s
+idempotency_replay   [  93% ] 450/450 VUs    4m56.6s/5m20.0s
+
+running (4m57.6s), 2500/2500 VUs, 181960 complete and 0 interrupted iterations
+browse_balance       [  93% ] 1500/1500 VUs  4m57.6s/5m20.0s
+commit_transfer      [  93% ] 550/550 VUs    4m57.6s/5m20.0s
+idempotency_replay   [  93% ] 450/450 VUs    4m57.6s/5m20.0s
+
+running (4m58.6s), 2500/2500 VUs, 182361 complete and 0 interrupted iterations
+browse_balance       [  93% ] 1500/1500 VUs  4m58.6s/5m20.0s
+commit_transfer      [  93% ] 550/550 VUs    4m58.6s/5m20.0s
+idempotency_replay   [  93% ] 450/450 VUs    4m58.6s/5m20.0s
+
+running (4m59.6s), 2500/2500 VUs, 182774 complete and 0 interrupted iterations
+browse_balance       [  94% ] 1500/1500 VUs  4m59.6s/5m20.0s
+commit_transfer      [  94% ] 550/550 VUs    4m59.6s/5m20.0s
+idempotency_replay   [  94% ] 450/450 VUs    4m59.6s/5m20.0s
+
+running (5m00.6s), 2500/2500 VUs, 183162 complete and 0 interrupted iterations
+browse_balance       [  94% ] 1500/1500 VUs  5m00.6s/5m20.0s
+commit_transfer      [  94% ] 550/550 VUs    5m00.6s/5m20.0s
+idempotency_replay   [  94% ] 450/450 VUs    5m00.6s/5m20.0s
+
+running (5m01.6s), 2500/2500 VUs, 183575 complete and 0 interrupted iterations
+browse_balance       [  94% ] 1500/1500 VUs  5m01.6s/5m20.0s
+commit_transfer      [  94% ] 550/550 VUs    5m01.6s/5m20.0s
+idempotency_replay   [  94% ] 450/450 VUs    5m01.6s/5m20.0s
+
+running (5m02.6s), 2500/2500 VUs, 183956 complete and 0 interrupted iterations
+browse_balance       [  95% ] 1500/1500 VUs  5m02.6s/5m20.0s
+commit_transfer      [  95% ] 550/550 VUs    5m02.6s/5m20.0s
+idempotency_replay   [  95% ] 450/450 VUs    5m02.6s/5m20.0s
+
+running (5m03.6s), 2500/2500 VUs, 184354 complete and 0 interrupted iterations
+browse_balance       [  95% ] 1500/1500 VUs  5m03.6s/5m20.0s
+commit_transfer      [  95% ] 550/550 VUs    5m03.6s/5m20.0s
+idempotency_replay   [  95% ] 450/450 VUs    5m03.6s/5m20.0s
+
+running (5m04.6s), 2500/2500 VUs, 184739 complete and 0 interrupted iterations
+browse_balance       [  95% ] 1500/1500 VUs  5m04.6s/5m20.0s
+commit_transfer      [  95% ] 550/550 VUs    5m04.6s/5m20.0s
+idempotency_replay   [  95% ] 450/450 VUs    5m04.6s/5m20.0s
+
+running (5m05.6s), 2500/2500 VUs, 185168 complete and 0 interrupted iterations
+browse_balance       [  96% ] 1500/1500 VUs  5m05.6s/5m20.0s
+commit_transfer      [  96% ] 550/550 VUs    5m05.6s/5m20.0s
+idempotency_replay   [  96% ] 450/450 VUs    5m05.6s/5m20.0s
+
+running (5m06.6s), 2500/2500 VUs, 185582 complete and 0 interrupted iterations
+browse_balance       [  96% ] 1500/1500 VUs  5m06.6s/5m20.0s
+commit_transfer      [  96% ] 550/550 VUs    5m06.6s/5m20.0s
+idempotency_replay   [  96% ] 450/450 VUs    5m06.6s/5m20.0s
+
+running (5m07.6s), 2500/2500 VUs, 185981 complete and 0 interrupted iterations
+browse_balance       [  96% ] 1500/1500 VUs  5m07.6s/5m20.0s
+commit_transfer      [  96% ] 550/550 VUs    5m07.6s/5m20.0s
+idempotency_replay   [  96% ] 450/450 VUs    5m07.6s/5m20.0s
+
+running (5m08.6s), 2500/2500 VUs, 186399 complete and 0 interrupted iterations
+browse_balance       [  96% ] 1500/1500 VUs  5m08.6s/5m20.0s
+commit_transfer      [  96% ] 550/550 VUs    5m08.6s/5m20.0s
+idempotency_replay   [  96% ] 450/450 VUs    5m08.6s/5m20.0s
+
+running (5m09.6s), 2500/2500 VUs, 186776 complete and 0 interrupted iterations
+browse_balance       [  97% ] 1500/1500 VUs  5m09.6s/5m20.0s
+commit_transfer      [  97% ] 550/550 VUs    5m09.6s/5m20.0s
+idempotency_replay   [  97% ] 450/450 VUs    5m09.6s/5m20.0s
+
+running (5m10.6s), 2488/2500 VUs, 187142 complete and 0 interrupted iterations
+browse_balance       [  97% ] 1489/1500 VUs  5m10.6s/5m20.0s
+commit_transfer      [  97% ] 550/550 VUs    5m10.6s/5m20.0s
+idempotency_replay   [  97% ] 449/450 VUs    5m10.6s/5m20.0s
+
+running (5m11.6s), 2436/2500 VUs, 187544 complete and 0 interrupted iterations
+browse_balance       [  97% ] 1450/1500 VUs  5m11.6s/5m20.0s
+commit_transfer      [  97% ] 540/550 VUs    5m11.6s/5m20.0s
+idempotency_replay   [  97% ] 446/450 VUs    5m11.6s/5m20.0s
+
+running (5m12.6s), 2359/2500 VUs, 187940 complete and 0 interrupted iterations
+browse_balance       [  98% ] 1397/1500 VUs  5m12.6s/5m20.0s
+commit_transfer      [  98% ] 524/550 VUs    5m12.6s/5m20.0s
+idempotency_replay   [  98% ] 438/450 VUs    5m12.6s/5m20.0s
+
+running (5m13.6s), 2245/2500 VUs, 188308 complete and 0 interrupted iterations
+browse_balance       [  98% ] 1315/1500 VUs  5m13.6s/5m20.0s
+commit_transfer      [  98% ] 506/550 VUs    5m13.6s/5m20.0s
+idempotency_replay   [  98% ] 424/450 VUs    5m13.6s/5m20.0s
+
+running (5m14.6s), 2095/2500 VUs, 188687 complete and 0 interrupted iterations
+browse_balance       [  98% ] 1206/1500 VUs  5m14.6s/5m20.0s
+commit_transfer      [  98% ] 489/550 VUs    5m14.6s/5m20.0s
+idempotency_replay   [  98% ] 400/450 VUs    5m14.6s/5m20.0s
+
+running (5m15.6s), 1949/2500 VUs, 189054 complete and 0 interrupted iterations
+browse_balance       [  99% ] 1096/1500 VUs  5m15.6s/5m20.0s
+commit_transfer      [  99% ] 469/550 VUs    5m15.6s/5m20.0s
+idempotency_replay   [  99% ] 384/450 VUs    5m15.6s/5m20.0s
+
+running (5m16.6s), 1784/2500 VUs, 189418 complete and 0 interrupted iterations
+browse_balance       [  99% ] 0979/1500 VUs  5m16.6s/5m20.0s
+commit_transfer      [  99% ] 443/550 VUs    5m16.6s/5m20.0s
+idempotency_replay   [  99% ] 362/450 VUs    5m16.6s/5m20.0s
+
+running (5m17.6s), 1562/2500 VUs, 189798 complete and 0 interrupted iterations
+browse_balance       [  99% ] 0817/1500 VUs  5m17.6s/5m20.0s
+commit_transfer      [  99% ] 413/550 VUs    5m17.6s/5m20.0s
+idempotency_replay   [  99% ] 332/450 VUs    5m17.6s/5m20.0s
+
+running (5m18.6s), 1290/2500 VUs, 190176 complete and 0 interrupted iterations
+browse_balance       [ 100% ] 0613/1500 VUs  5m18.6s/5m20.0s
+commit_transfer      [ 100% ] 379/550 VUs    5m18.6s/5m20.0s
+idempotency_replay   [ 100% ] 298/450 VUs    5m18.6s/5m20.0s
+
+running (5m19.6s), 1008/2500 VUs, 190507 complete and 0 interrupted iterations
+browse_balance       [ 100% ] 0400/1500 VUs  5m19.6s/5m20.0s
+commit_transfer      [ 100% ] 335/550 VUs    5m19.6s/5m20.0s
+idempotency_replay   [ 100% ] 273/450 VUs    5m19.6s/5m20.0s
+
+running (5m20.6s), 0688/2500 VUs, 190831 complete and 0 interrupted iterations
+browse_balance     ↓ [ 100% ] 0323/1500 VUs  5m20s
+commit_transfer    ↓ [ 100% ] 315/550 VUs    5m20s
+idempotency_replay ↓ [ 100% ] 252/450 VUs    5m20s
+
+running (5m21.6s), 0463/2500 VUs, 191056 complete and 0 interrupted iterations
+browse_balance     ↓ [ 100% ] 0323/1500 VUs  5m20s
+commit_transfer    ↓ [ 100% ] 315/550 VUs    5m20s
+idempotency_replay ↓ [ 100% ] 252/450 VUs    5m20s
+
+running (5m22.6s), 0321/2500 VUs, 191198 complete and 0 interrupted iterations
+browse_balance     ↓ [ 100% ] 0323/1500 VUs  5m20s
+commit_transfer    ↓ [ 100% ] 315/550 VUs    5m20s
+idempotency_replay ↓ [ 100% ] 252/450 VUs    5m20s
+
+running (5m23.6s), 0209/2500 VUs, 191310 complete and 0 interrupted iterations
+browse_balance     ✓ [ 100% ] 0000/1500 VUs  5m20s
+commit_transfer    ↓ [ 100% ] 315/550 VUs    5m20s
+idempotency_replay ↓ [ 100% ] 252/450 VUs    5m20s
+
+running (5m24.6s), 0118/2500 VUs, 191401 complete and 0 interrupted iterations
+browse_balance     ✓ [ 100% ] 0000/1500 VUs  5m20s
+commit_transfer    ↓ [ 100% ] 315/550 VUs    5m20s
+idempotency_replay ↓ [ 100% ] 252/450 VUs    5m20s
+
+running (5m25.6s), 0045/2500 VUs, 191474 complete and 0 interrupted iterations
+browse_balance     ✓ [ 100% ] 0000/1500 VUs  5m20s
+commit_transfer    ↓ [ 100% ] 315/550 VUs    5m20s
+idempotency_replay ↓ [ 100% ] 252/450 VUs    5m20s
+
+running (5m26.6s), 0005/2500 VUs, 191514 complete and 0 interrupted iterations
+browse_balance     ✓ [ 100% ] 0000/1500 VUs  5m20s
+commit_transfer    ↓ [ 100% ] 315/550 VUs    5m20s
+idempotency_replay ↓ [ 100% ] 252/450 VUs    5m20s
+
+
+  █ THRESHOLDS 
+
+    http_req_duration
+    ✗ 'p(95)<5000' p(95)=6.07s
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+    transfer_errors
+    ✓ 'count<200' count=0
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 191519  585.493596/s
+    checks_succeeded...: 100.00% 191519 out of 191519
+    checks_failed......: 0.00%   0 out of 191519
+
+    ✓ browse_balance - ok
+    ✓ commit_transfer - ok
+    ✓ idempotency_replay - ok
+
+    CUSTOM
+    transfer_duration..............: avg=3.92s min=364.28µs med=3.54s    max=51.79s p(90)=6.09s p(95)=6.71s
+    transfer_errors................: 0      0/s
+    transfers_committed............: 55923  170.962455/s
+
+    HTTP
+    http_req_duration..............: avg=1.82s min=201.13µs med=321.94ms max=51.79s p(90)=5.05s p(95)=6.07s
+      { expected_response:true }...: avg=1.82s min=201.13µs med=321.94ms max=51.79s p(90)=5.05s p(95)=6.07s
+    http_req_failed................: 0.00%  0 out of 191519
+    http_reqs......................: 191519 585.493596/s
+
+    EXECUTION
+    iteration_duration.............: avg=4.09s min=501.76ms med=3.18s    max=53.77s p(90)=6.82s p(95)=8.06s
+    iterations.....................: 191519 585.493596/s
+    vus............................: 5      min=5           max=2500
+    vus_max........................: 2500   min=2500        max=2500
+
+    NETWORK
+    data_received..................: 38 MB  115 kB/s
+    data_sent......................: 27 MB  84 kB/s
+
+
+
+
+running (5m27.1s), 0000/2500 VUs, 191519 complete and 0 interrupted iterations
+browse_balance     ✓ [ 100% ] 0000/1500 VUs  5m20s
+commit_transfer    ✓ [ 100% ] 000/550 VUs    5m20s
+idempotency_replay ✓ [ 100% ] 000/450 VUs    5m20s

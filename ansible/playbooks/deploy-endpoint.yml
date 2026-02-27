@@ -1,0 +1,151 @@
+---
+- name: Deploy .NET API to Endpoint VM
+  hosts: endpoint
+  become: true
+
+  vars:
+    src_dir: /home/benchadmin/src
+    publish_dir: /opt/benchtest
+    service_name: benchtest
+
+  tasks:
+
+
+
+    - name: Ensure source directory exists
+      ansible.builtin.file:
+        path: "{{ src_dir }}"
+        state: directory
+        owner: benchadmin
+        group: benchadmin
+        mode: "0755"
+
+    - name: Clean publish directory (do not delete src_dir)
+      ansible.builtin.file:
+        path: "{{ publish_dir }}"
+        state: absent
+
+    - name: Recreate publish directory
+      ansible.builtin.file:
+        path: "{{ publish_dir }}"
+        state: directory
+        owner: benchadmin
+        group: benchadmin
+        mode: "0755"
+
+
+
+
+    - name: Define endpoint bundle path (local)
+      ansible.builtin.set_fact:
+        endpoint_bundle: "/tmp/endpoint_bundle_{{ hostvars['localhost']['run_id'] | default(ansible_date_time.epoch) }}.tar.gz"
+      delegate_to: localhost
+      run_once: true
+      become: false
+
+    - name: 1) Create endpoint tarball on control node
+      ansible.builtin.command:
+        cmd: >
+          tar -czf "{{ endpoint_bundle }}"
+          --exclude=.git
+          --exclude=.github
+          --exclude=.vs
+          --exclude=.vscode
+          --exclude=**/bin
+          --exclude=**/obj
+          --exclude=**/.terraform
+          -C "{{ playbook_dir }}/../../endpoint/" .
+      delegate_to: localhost
+      run_once: true
+      become: false
+
+    - name: 2) Upload and extract bundle on VM
+      ansible.builtin.unarchive:
+        src: "{{ endpoint_bundle }}"
+        dest: "{{ src_dir }}/"
+        owner: benchadmin
+        group: benchadmin
+        remote_src: false
+
+    - name: 3) Remove local tarball
+      ansible.builtin.file:
+        path: "{{ endpoint_bundle }}"
+        state: absent
+      delegate_to: localhost
+      run_once: true
+      become: false
+
+
+
+
+    - name: Publish .NET application
+      ansible.builtin.command:
+        cmd: >
+          dotnet publish
+          "{{ src_dir }}/InstantPaymentBench.Api/InstantPaymentBench.Api.csproj"
+          -c Release
+          -o "{{ publish_dir }}"
+          --no-self-contained
+      become_user: benchadmin
+      register: publish_result
+
+    - name: Show publish output
+      ansible.builtin.debug:
+        msg: "{{ publish_result.stdout_lines[-3:] }}"
+
+
+
+
+    - name: Template appsettings.Production.json
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/appsettings.Production.json.j2"
+        dest: "{{ publish_dir }}/appsettings.Production.json"
+        owner: benchadmin
+        group: benchadmin
+        mode: "0640"
+
+    - name: Fix ownership
+      ansible.builtin.file:
+        path: "{{ publish_dir }}"
+        state: directory
+        recurse: true
+        owner: benchadmin
+        group: benchadmin
+
+    - name: Install systemd unit
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/benchtest.service.j2"
+        dest: "/etc/systemd/system/{{ service_name }}.service"
+        mode: "0644"
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Restart API service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        state: restarted
+        enabled: true
+
+
+
+
+    - name: Wait for API to be ready
+      ansible.builtin.uri:
+        url: "http://localhost:5000/api/accounts/1/balance"
+        status_code: 200
+      register: health_check
+      retries: 10
+      delay: 2
+      until: health_check is not failed
+
+    - name: Show service status
+      ansible.builtin.command:
+        cmd: systemctl status {{ service_name }} --no-pager -l
+      register: status
+      changed_when: false
+
+    - name: Show status
+      ansible.builtin.debug:
+        msg: "{{ status.stdout_lines[:10] }}"

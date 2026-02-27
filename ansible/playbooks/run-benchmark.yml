@@ -1,0 +1,914 @@
+---
+- name: Run benchmark with full collection (SQL + Linux + k6) and fetch results
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    project_root: "{{ (playbook_dir ~ '/..') | realpath }}"
+    results_dir: "{{ lookup('env','RESULTS_DIR') | default(project_root ~ '/results', true) }}"
+    k6_script: "{{ k6_script | default('main-exhaustion.js') }}"
+    vu_scale: "{{ vu_scale | default(1) }}"
+    diag_flag: "{{ (diag | default(0)) | int }}"
+    clear_waits_flag: "{{ (clear_waits | default(0)) | int }}"
+    db_name: "{{ lookup('env','DB_NAME') | default('InstantPaymentBench', true) }}"
+    sql_group: >-
+      {{
+        'sql_win'    if (groups['sql_win']    | default([]) | length > 0)
+        else 'sql_linux' if (groups['sql_linux'] | default([]) | length > 0)
+        else 'sql'
+      }}
+
+  tasks:
+    - name: Fail if inventory groups are missing
+      fail:
+        msg: "Inventory not loaded or missing groups: expected [endpoint], [k6], and either [sql_win] or [sql_linux]."
+      when: >
+        groups['endpoint'] is not defined or
+        groups['k6'] is not defined or
+        ('sql_win' not in groups and 'sql_linux' not in groups)
+
+    - name: Freeze run_id and set global facts
+      set_fact:
+        run_id: "{{ lookup('pipe','date +%Y%m%d_%H%M%S') }}"
+        db_name: "{{ db_name }}"
+        diag_flag: "{{ (diag | default(0)) | int }}"
+        mssql_sa_password: >-
+          {{
+            (hostvars[groups[sql_group][0]].sql_auth_password | default('')) |
+            default(lookup('env','MSSQL_SA_PASSWORD'), true)
+          }}
+      changed_when: false
+      no_log: true
+
+    - name: Fail if mssql_sa_password is empty
+      fail:
+        msg: "sql_auth_password (group_vars/sql.yml) or env MSSQL_SA_PASSWORD is required but empty."
+      when: (hostvars['localhost']['mssql_sa_password'] | default('') | trim) == ""
+
+    - name: Compute out_dir from frozen run_id
+      set_fact:
+        out_dir: "{{ (results_dir ~ '/' ~ run_id) | realpath }}"
+      changed_when: false
+
+    - name: Ensure local results directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ results_dir }}"
+        - "{{ out_dir }}"
+
+    - name: Ensure local XE directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ out_dir }}/xe"
+        - "{{ out_dir }}/xe/raw"
+      when: (xe | default(0) | int) == 1
+
+    - name: Write run metadata (local)
+      copy:
+        dest: "{{ out_dir }}/run.meta.txt"
+        content: |
+          run_id={{ run_id }}
+          k6_script={{ k6_script }}
+          vu_scale={{ vu_scale }}
+          diag={{ diag_flag }}
+          clear_waits={{ clear_waits_flag }}
+          db_name={{ db_name }}
+          results_dir={{ results_dir }}
+          out_dir={{ out_dir }}
+        force: true
+
+- name: Optional Linux diagnostics (endpoint + k6)
+  hosts: endpoint:k6
+  gather_facts: false
+  become: true
+  vars:
+    diag_flag: "{{ (hostvars['localhost']['diag_flag'] | default(0)) | int }}"
+    run_id: "{{ hostvars['localhost']['run_id'] }}"
+    out_dir: "{{ hostvars['localhost']['out_dir'] }}"
+  tasks:
+    - name: Collect basic sysinfo
+      shell: |
+        set -e
+        echo "=== uname ==="; uname -a
+        echo "=== uptime ==="; uptime
+        echo "=== cpu ==="; lscpu | head -n 30
+        echo "=== mem ==="; free -h
+        echo "=== disk ==="; lsblk
+        echo "=== df ==="; df -h
+      register: sysinfo
+      when: (diag_flag | int) == 1
+
+    - name: Save sysinfo to remote temp file
+      copy:
+        dest: "/tmp/bench_sysinfo_{{ run_id }}.txt"
+        content: "{{ sysinfo.stdout }}"
+      when: (diag_flag | int) == 1
+
+    - name: Ensure per-host diag directory exists on controller
+      ansible.builtin.file:
+        path: "{{ out_dir }}/{{ inventory_hostname }}/diag"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      become: false
+      when: (diag_flag | int) == 1
+
+    - name: Fetch sysinfo to local results
+      fetch:
+        src: "/tmp/bench_sysinfo_{{ run_id }}.txt"
+        dest: "{{ out_dir }}/{{ inventory_hostname }}/diag/"
+        flat: true
+      when: (diag_flag | int) == 1
+
+- name: Optional Windows SQL diagnostics
+  hosts: sql_win, sql_linux
+  gather_facts: true
+  become: false
+  vars:
+    diag_flag: "{{ (hostvars['localhost']['diag_flag'] | default(0)) | int }}"
+    run_id: "{{ hostvars['localhost']['run_id'] }}"
+    out_dir: "{{ hostvars['localhost']['out_dir'] }}"
+  tasks:
+    - name: Collect Windows sysinfo
+      ansible.windows.win_shell: |
+        Write-Output "=== systeminfo ==="
+        systeminfo
+        Write-Output "=== cpu ==="
+        Get-WmiObject Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed | Format-List
+        Write-Output "=== memory ==="
+        Get-WmiObject Win32_ComputerSystem | Select-Object TotalPhysicalMemory | Format-List
+        Write-Output "=== disks ==="
+        Get-WmiObject Win32_LogicalDisk | Select-Object DeviceID, Size, FreeSpace, FileSystem | Format-List
+        Write-Output "=== power plan ==="
+        powercfg /getactivescheme
+      register: win_sysinfo
+      when:
+        - (diag_flag | int) == 1
+        - ansible_facts['os_family'] == 'Windows'
+
+    - name: Save Windows sysinfo to controller
+      ansible.builtin.copy:
+        dest: "{{ out_dir }}/sysinfo_sql_windows_{{ run_id }}.txt"
+        content: "{{ win_sysinfo.stdout }}"
+      delegate_to: localhost
+      when:
+        - (diag_flag | int) == 1
+        - ansible_facts['os_family'] == 'Windows'
+
+- name: Validate DB Baseline and Write Marker
+  hosts: sql_win, sql_linux
+  gather_facts: true
+  vars:
+    run_id: "{{ hostvars['localhost']['run_id'] }}"
+    out_dir: "{{ hostvars['localhost']['out_dir'] }}"
+    db_name: "{{ hostvars['localhost']['db_name'] }}"
+    mssql_sa_password: "{{ sql_auth_password | default(lookup('env','MSSQL_SA_PASSWORD'), true) }}"
+    sql_login_user_resolved: "{{ (sql_login_user | default('')) | trim | default(('benchadmin' if ansible_facts['os_family'] == 'Windows' else 'sa'), true) }}"
+  tasks:
+    - name: Run baseline query (Linux)
+      ansible.builtin.shell: |
+        set -e
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d {{ db_name }} -C -Q "SELECT 'Account' AS Tbl, COUNT(*) AS Cnt FROM dbo.Account UNION ALL SELECT 'LedgerEntry', COUNT(*) FROM dbo.LedgerEntry UNION ALL SELECT 'Transfer', COUNT(*) FROM dbo.Transfer;"
+      environment:
+        MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+      register: baseline_counts_linux
+      no_log: true
+      changed_when: false
+      failed_when: false
+      when: ansible_facts['os_family'] != 'Windows'
+
+    - name: Run baseline query (Windows)
+      ansible.windows.win_shell: |
+        & "sqlcmd.exe" -b -S localhost -U {{ sql_login_user_resolved }} -P "$env:MSSQL_SA_PASSWORD" -d {{ db_name }} -C -Q "SELECT 'Account' AS Tbl, COUNT(*) AS Cnt FROM dbo.Account UNION ALL SELECT 'LedgerEntry', COUNT(*) FROM dbo.LedgerEntry UNION ALL SELECT 'Transfer', COUNT(*) FROM dbo.Transfer;"
+      environment:
+        MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+      register: baseline_counts_win
+      no_log: true
+      changed_when: false
+      failed_when: false
+      when: ansible_facts['os_family'] == 'Windows'
+
+    - name: Write marker and results
+      ansible.builtin.copy:
+        dest: "{{ out_dir }}/db_recreated.txt"
+        content: |
+          Timestamp: {{ lookup('pipe','date -Is') }}
+          Deploy Path: {{ ansible_facts['os_family'] }}
+          Database: {{ db_name }}
+          Baseline Row Counts:
+          {{ baseline_counts_linux.stdout | default(baseline_counts_win.stdout | default('FAILED', true), true) }}
+      delegate_to: localhost
+      become: false
+
+- name: SQL pre/post collection + reset + optional diag
+  hosts: sql_win, sql_linux
+  gather_facts: true
+  vars:
+
+    ansible_winrm_operation_timeout_sec: 300
+    ansible_winrm_read_timeout_sec: 600
+
+    run_id: "{{ hostvars['localhost']['run_id'] }}"
+    out_dir: "{{ hostvars['localhost']['out_dir'] }}"
+    db_name: "{{ hostvars['localhost']['db_name'] }}"
+    mssql_sa_password: "{{ sql_auth_password | default(lookup('env','MSSQL_SA_PASSWORD'), true) }}"
+
+
+    sql_login_user_resolved: "{{ (sql_login_user | default('')) | trim | default(('benchadmin' if ansible_facts['os_family'] == 'Windows' else 'sa'), true) }}"
+
+  tasks:
+    - name: Set XE facts (base)
+      set_fact:
+        xe_enabled: "{{ (xe | default(0) | int) == 1 }}"
+        xe_is_windows: "{{ ansible_facts['os_family'] == 'Windows' }}"
+        xe_prefix: "xe_{{ run_id }}"
+      when: (xe | default(0) | int) == 1
+
+    - name: Set XE facts (targets)
+      set_fact:
+        xe_base_path: "{{ 'C:\\ProgramData\\InstantPaymentBenchXe' if xe_is_windows else '/var/opt/mssql/log/InstantPaymentBenchXe' }}"
+        xe_target: "{{ 'C:\\ProgramData\\InstantPaymentBenchXe\\xe_' ~ run_id if xe_is_windows else '/var/opt/mssql/log/InstantPaymentBenchXe/xe_' ~ run_id }}"
+        xe_export_file: "{{ 'C:\\ProgramData\\InstantPaymentBenchXe\\xe_deadlocks_' ~ run_id ~ '.xml' if xe_is_windows else '/var/opt/mssql/log/InstantPaymentBenchXe/xe_deadlocks_' ~ run_id ~ '.xml' }}"
+      when: (xe | default(0) | int) == 1
+
+    - name: Append XE metadata to run.meta.txt
+      lineinfile:
+        path: "{{ out_dir }}/run.meta.txt"
+        line: "{{ item }}"
+        insertafter: EOF
+      delegate_to: localhost
+      loop:
+        - "xe=1"
+        - "xe_base_path={{ xe_base_path }}"
+        - "xe_prefix={{ xe_prefix }}"
+        - "xe_target={{ xe_target }}"
+        - "xe_export_file={{ xe_export_file }}"
+        - "sql_host={{ inventory_hostname }}"
+        - "sql_os_family={{ ansible_facts['os_family'] }}"
+      when: (xe | default(0) | int) == 1
+
+    - name: Fail if SQL password is missing on sql host
+      fail:
+        msg: "sql_auth_password is missing on sql host (group_vars/sql.yml) and env MSSQL_SA_PASSWORD is empty."
+      when: (mssql_sa_password | default('') | trim) == ""
+      no_log: true
+
+    - name: Ensure target login has ALTER SERVER STATE permission (Linux)
+      shell: |
+        set -e
+        {{ sqlcmd_bin | default('sqlcmd') }} -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -d master -C -Q "GRANT ALTER SERVER STATE TO [{{ sql_login_user_resolved }}];"
+      environment:
+        MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+      no_log: true
+      when: ansible_facts['os_family'] != 'Windows'
+      changed_when: false
+
+    - name: Ensure target login has ALTER SERVER STATE permission (Windows)
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+        & "{{ sqlcmd_bin | default('sqlcmd') }}" -b -S localhost -U {{ sql_login_user_resolved }} -d master -C -Q "GRANT ALTER SERVER STATE TO [{{ sql_login_user_resolved }}];"
+      no_log: true
+      when: ansible_facts['os_family'] == 'Windows'
+      changed_when: false
+
+    - name: Materialize clear_waits_flag as host fact
+      set_fact:
+        clear_waits_flag: "{{ (clear_waits | default(0)) | int }}"
+      changed_when: false
+
+    - name: Initialize empty XE file lists to prevent undefined skips
+      set_fact:
+        fetch_xel_linux: { "files": [] }
+        fetch_xel_win: { "files": [] }
+      when: (xe | default(0) | int) == 1
+
+    - name: Linux SQL tasks (pre)
+      when: ansible_facts['os_family'] != 'Windows'
+      become: true
+      block:
+        - name: Detect sqlcmd location (Linux)
+          shell: |
+            set -e
+            if command -v sqlcmd >/dev/null 2>&1; then
+              command -v sqlcmd
+            elif [ -x /opt/mssql-tools18/bin/sqlcmd ]; then
+              echo /opt/mssql-tools18/bin/sqlcmd
+            elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then
+              echo /opt/mssql-tools/bin/sqlcmd
+            else
+              exit 1
+            fi
+          register: sqlcmd_detect_linux
+          changed_when: false
+
+        - name: Fail if sqlcmd not found (Linux)
+          fail:
+            msg: "sqlcmd not found in PATH or standard /opt/mssql-tools* locations. Please install mssql-tools."
+          when: sqlcmd_detect_linux.rc != 0
+
+        - name: Set sqlcmd_bin fact (Linux)
+          set_fact:
+            sqlcmd_bin: "{{ sqlcmd_detect_linux.stdout | trim }}"
+          changed_when: false
+
+        - name: Ensure XE base dir exists (Linux)
+          file:
+            path: "{{ xe_base_path }}"
+            state: directory
+            owner: mssql
+            group: mssql
+            mode: '0755'
+          when: (xe | default(0) | int) == 1
+
+        - name: Find old XE files (Linux)
+          find:
+            paths: "{{ xe_base_path }}"
+            patterns: "{{ xe_prefix }}*.xel"
+          register: old_xe_linux
+          when: (xe | default(0) | int) == 1
+
+        - name: Delete old XE files (Linux)
+          file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ (old_xe_linux.files | default([])) }}"
+          when: (xe | default(0) | int) == 1
+
+        - name: Copy XE SQL scripts to SQL host (Linux)
+          copy:
+            src: "{{ playbook_dir }}/../../sql/{{ item }}"
+            dest: "/tmp/{{ item }}"
+          loop:
+            - xe_create.sql
+            - xe_start.sql
+          when: (xe | default(0) | int) == 1
+
+        - name: Create XE session (Linux)
+          shell: |
+            set -e
+            {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d master -C -i /tmp/xe_create.sql -v xe_path="{{ xe_target }}"
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Start XE session (Linux)
+          shell: |
+            set -e
+            {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d master -C -i /tmp/xe_start.sql
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Clear wait stats (Linux)
+          block:
+            - name: Run DBCC SQLPERF CLEAR (Linux)
+
+              shell: |
+                set -e
+                {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d master -C -Q "DBCC SQLPERF('sys.dm_os_wait_stats', CLEAR);"
+              environment:
+                MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+
+              when: (clear_waits_flag | int) == 1
+
+          rescue:
+            - name: Write diagnostic marker on controller for CLEAR (Linux)
+              ansible.builtin.copy:
+                dest: "{{ out_dir }}/sqlcmd_linux_clear_error_{{ run_id }}.txt"
+                content: |
+                  sqlcmd failed executing DBCC SQLPERF CLEAR on Linux.
+                  Likely causes:
+                  - Login mismatch (using user: {{ sql_login_user_resolved }})
+                  - Missing permission ALTER SERVER STATE
+                  Fix (run once as sysadmin):
+                    GRANT ALTER SERVER STATE TO [{{ sql_login_user_resolved }}];
+              delegate_to: localhost
+              become: false
+
+            - name: Fail with actionable hint for CLEAR (Linux)
+              ansible.builtin.fail:
+                msg: >-
+                  sqlcmd failed on Linux executing DBCC SQLPERF CLEAR.
+                  Most likely login mismatch ({{ sql_login_user_resolved }}) or missing ALTER SERVER STATE.
+                  See {{ out_dir }}/sqlcmd_linux_clear_error_{{ run_id }}.txt for hints.
+              become: false
+
+        - name: Copy fingerprint SQL script to SQL host (Linux)
+          copy:
+            src: "{{ playbook_dir }}/../../sql/fingerprint.sql"
+            dest: "/tmp/fingerprint.sql"
+
+        - name: Run tuning fingerprint query (Linux)
+          shell: |
+            set -e
+            {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d {{ db_name }} -C -i /tmp/fingerprint.sql -o /tmp/sql_fingerprint_{{ run_id }}.txt
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          no_log: true
+
+        - name: Fetch tuning fingerprint to controller (Linux)
+          fetch:
+            src: "/tmp/sql_fingerprint_{{ run_id }}.txt"
+            dest: "{{ out_dir }}/sql_fingerprint_{{ run_id }}.txt"
+            flat: true
+
+        - name: Collect waits BEFORE (Linux)
+          shell: |
+            set -e
+            {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d {{ db_name }} -C \
+              -Q "SELECT TOP 50 * FROM sys.dm_os_wait_stats ORDER BY wait_time_ms DESC;" -s "," -W
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          register: waits_before_linux
+          no_log: true
+
+        - name: Save waits BEFORE to file (Linux)
+          copy:
+            dest: "/tmp/wait_stats_before_{{ run_id }}.csv"
+            content: "{{ waits_before_linux.stdout }}"
+
+        - name: Fetch waits BEFORE (Linux)
+          fetch:
+            src: "/tmp/wait_stats_before_{{ run_id }}.csv"
+            dest: "{{ out_dir }}/"
+            flat: true
+
+    - name: Windows SQL tasks (pre)
+      when: ansible_facts['os_family'] == 'Windows'
+      become: false
+      block:
+        - name: Detect sqlcmd location (Windows) - fast
+          ansible.windows.win_shell: |
+            where.exe sqlcmd
+          register: sqlcmd_where
+          changed_when: false
+          failed_when: false
+
+        - name: Detect sqlcmd location (Windows) - fallback
+          ansible.windows.win_shell: |
+            $cmd = Get-Command sqlcmd.exe -ErrorAction SilentlyContinue
+            if ($cmd) { $cmd.Source } else { "" }
+          register: sqlcmd_cmd
+          changed_when: false
+          failed_when: false
+          when: (sqlcmd_where.rc | default(1)) != 0 or (sqlcmd_where.stdout | default('') | trim) == ""
+
+        - name: Set sqlcmd_bin fact (Windows)
+          set_fact:
+            sqlcmd_bin: >-
+              {{
+                ((sqlcmd_where.stdout_lines | default(['']))[0] | trim)
+                if ((sqlcmd_where.stdout_lines | default([])) | length > 0 and ((sqlcmd_where.stdout_lines | default(['']))[0] | trim) != '')
+                else
+                (sqlcmd_cmd.stdout | default('') | trim)
+              }}
+          changed_when: false
+
+        - name: Fail if sqlcmd not found (Windows)
+          fail:
+            msg: "sqlcmd.exe not found on Windows SQL host. Install SQLCMD (mssql-tools/sqlcmd) or ensure it is in PATH."
+          when: (sqlcmd_bin | default('') | trim) == ""
+
+        - name: Ensure XE base dir exists (Windows)
+          ansible.windows.win_file:
+            path: "{{ xe_base_path }}"
+            state: directory
+          when: (xe | default(0) | int) == 1
+
+        - name: Find old XE files (Windows)
+          ansible.windows.win_find:
+            paths: "{{ xe_base_path }}"
+            patterns: "{{ xe_prefix }}*.xel"
+          register: old_xe_win
+          when: (xe | default(0) | int) == 1
+
+        - name: Delete old XE files (Windows)
+          ansible.windows.win_file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ (old_xe_win.files | default([])) }}"
+          when: (xe | default(0) | int) == 1
+
+        - name: Copy XE SQL scripts to Temp (Windows)
+          ansible.windows.win_copy:
+            src: "{{ playbook_dir }}/../../sql/{{ item }}"
+            dest: "C:\\Windows\\Temp\\{{ item }}"
+          loop:
+            - xe_create.sql
+            - xe_start.sql
+          when: (xe | default(0) | int) == 1
+
+        - name: Create XE session (Windows)
+          ansible.windows.win_shell: |
+            $xePath = "{{ xe_target }}"
+            $sql = (Get-Content "C:\Windows\Temp\xe_create.sql" -Raw) -replace '\$\(xe_path\)', $xePath
+            $tmpSql = "C:\Windows\Temp\xe_create_resolved.sql"
+            $sql | Set-Content $tmpSql -Encoding UTF8
+            $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+            & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d master -C -i $tmpSql
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Start XE session (Windows)
+          ansible.windows.win_shell: |
+            $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+            & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d master -C -i "C:\\Windows\\Temp\\xe_start.sql"
+          no_log: false
+          when: (xe | default(0) | int) == 1
+
+        - name: Clear wait stats (Windows)
+          block:
+            - name: Run DBCC SQLPERF CLEAR (Windows)
+
+              ansible.windows.win_shell: |
+                $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+                & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d master -C -Q "DBCC SQLPERF('sys.dm_os_wait_stats', CLEAR);"
+              no_log: true
+              when: (clear_waits_flag | int) == 1
+
+          rescue:
+            - name: Write diagnostic marker on controller for CLEAR (Windows)
+              ansible.builtin.copy:
+                dest: "{{ out_dir }}/sqlcmd_windows_clear_error_{{ run_id }}.txt"
+                content: |
+                  sqlcmd failed executing DBCC SQLPERF CLEAR on Windows.
+                  Likely causes:
+                  - Login mismatch (using user: {{ sql_login_user_resolved }})
+                  - Missing permission ALTER SERVER STATE
+                  Fix (run once as sysadmin):
+                    GRANT ALTER SERVER STATE TO [{{ sql_login_user_resolved }}];
+              delegate_to: localhost
+
+            - name: Fail with actionable hint for CLEAR (Windows)
+              ansible.builtin.fail:
+                msg: >-
+                  sqlcmd failed on Windows executing DBCC SQLPERF CLEAR.
+                  Most likely login mismatch ({{ sql_login_user_resolved }}) or missing ALTER SERVER STATE.
+                  See {{ out_dir }}/sqlcmd_windows_clear_error_{{ run_id }}.txt for hints.
+
+        - name: Copy fingerprint SQL script to Temp (Windows)
+          ansible.windows.win_copy:
+            src: "{{ playbook_dir }}/../../sql/fingerprint.sql"
+            dest: "C:\\Windows\\Temp\\fingerprint.sql"
+
+        - name: Run tuning fingerprint query (Windows)
+          ansible.windows.win_shell: |
+            $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+            & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d {{ db_name }} -C -i "C:\Windows\Temp\fingerprint.sql"
+          register: fingerprint_win
+          no_log: true
+
+        - name: Save tuning fingerprint directly on controller (Windows)
+          ansible.builtin.copy:
+            dest: "{{ out_dir }}/sql_fingerprint_{{ run_id }}.txt"
+            content: "{{ fingerprint_win.stdout | default('') }}"
+          delegate_to: localhost
+
+        - name: Collect waits BEFORE (Windows)
+          block:
+            - name: Run wait stats query (Windows)
+              ansible.windows.win_shell: |
+                $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+                & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d {{ db_name }} -C -Q "SELECT TOP 50 * FROM sys.dm_os_wait_stats ORDER BY wait_time_ms DESC;" -s "," -W
+              register: waits_before_win
+              no_log: true
+
+          rescue:
+            - name: Write diagnostic marker on controller (Windows BEFORE)
+              ansible.builtin.copy:
+                dest: "{{ out_dir }}/sqlcmd_windows_before_error_{{ run_id }}.txt"
+                content: |
+                  sqlcmd failed collecting dm_os_wait_stats BEFORE on Windows.
+                  Likely causes:
+                  - Login mismatch (using user: {{ sql_login_user_resolved }})
+                  - Missing permission VIEW SERVER STATE for dm_os_wait_stats
+                  Fix (run once as sysadmin):
+                    GRANT VIEW SERVER STATE TO [{{ sql_login_user_resolved }}];
+              delegate_to: localhost
+
+            - name: Fail with actionable hint (Windows BEFORE)
+              ansible.builtin.fail:
+                msg: >-
+                  sqlcmd failed on Windows collecting dm_os_wait_stats BEFORE.
+                  Most likely login mismatch ({{ sql_login_user_resolved }}) or missing VIEW SERVER STATE.
+                  See {{ out_dir }}/sqlcmd_windows_before_error_{{ run_id }}.txt for hints.
+
+        - name: Save waits BEFORE directly on controller (Windows)
+          ansible.builtin.copy:
+            dest: "{{ out_dir }}/wait_stats_before_{{ run_id }}.csv"
+            content: "{{ waits_before_win.stdout | default('') }}"
+          delegate_to: localhost
+
+- name: Run k6 on k6 host
+  hosts: k6
+  gather_facts: false
+  vars:
+    run_id: "{{ hostvars['localhost']['run_id'] }}"
+    out_dir: "{{ hostvars['localhost']['out_dir'] }}"
+    k6_script: "{{ hostvars['localhost']['k6_script'] }}"
+    vu_scale: "{{ hostvars['localhost']['vu_scale'] }}"
+  tasks:
+    - name: Run k6 and capture stdout
+      shell: |
+        set -e
+        VU_SCALE={{ vu_scale }} /opt/k6/run.sh {{ k6_script }} | tee /tmp/k6_{{ run_id }}.log
+      args:
+        executable: /bin/bash
+
+    - name: Fetch k6 log
+      fetch:
+        src: "/tmp/k6_{{ run_id }}.log"
+        dest: "{{ out_dir }}/"
+        flat: true
+
+- name: SQL post collection
+  hosts: sql_win, sql_linux
+  gather_facts: true
+  vars:
+    ansible_winrm_operation_timeout_sec: 300
+    ansible_winrm_read_timeout_sec: 600
+
+    run_id: "{{ hostvars['localhost']['run_id'] }}"
+    out_dir: "{{ hostvars['localhost']['out_dir'] }}"
+    db_name: "{{ hostvars['localhost']['db_name'] }}"
+    mssql_sa_password: "{{ sql_auth_password | default(lookup('env','MSSQL_SA_PASSWORD'), true) }}"
+    sql_login_user_resolved: "{{ (sql_login_user | default('')) | trim | default(('benchadmin' if ansible_facts['os_family'] == 'Windows' else 'sa'), true) }}"
+
+  tasks:
+    - name: Set XE facts (base)
+      set_fact:
+        xe_enabled: "{{ (xe | default(0) | int) == 1 }}"
+        xe_is_windows: "{{ ansible_facts['os_family'] == 'Windows' }}"
+        xe_prefix: "xe_{{ run_id }}"
+      when: (xe | default(0) | int) == 1
+
+    - name: Set XE facts (targets)
+      set_fact:
+        xe_base_path: "{{ 'C:\\ProgramData\\InstantPaymentBenchXe' if xe_is_windows else '/var/opt/mssql/log/InstantPaymentBenchXe' }}"
+        xe_target: "{{ 'C:\\ProgramData\\InstantPaymentBenchXe\\xe_' ~ run_id if xe_is_windows else '/var/opt/mssql/log/InstantPaymentBenchXe/xe_' ~ run_id }}"
+        xe_export_file: "{{ 'C:\\ProgramData\\InstantPaymentBenchXe\\xe_deadlocks_' ~ run_id ~ '.xml' if xe_is_windows else '/var/opt/mssql/log/InstantPaymentBenchXe/xe_deadlocks_' ~ run_id ~ '.xml' }}"
+      when: (xe | default(0) | int) == 1
+
+    - name: Initialize empty XE file lists to prevent undefined skips (post)
+      set_fact:
+        fetch_xel_linux: { "files": [] }
+        fetch_xel_win: { "files": [] }
+      when: (xe | default(0) | int) == 1
+
+    - name: Linux SQL tasks (post)
+      when: ansible_facts['os_family'] != 'Windows'
+      become: true
+      block:
+        - name: Detect sqlcmd location (post Linux)
+          shell: |
+            set -e
+            if command -v sqlcmd >/dev/null 2>&1; then
+              command -v sqlcmd
+            elif [ -x /opt/mssql-tools18/bin/sqlcmd ]; then
+              echo /opt/mssql-tools18/bin/sqlcmd
+            elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then
+              echo /opt/mssql-tools/bin/sqlcmd
+            else
+              exit 1
+            fi
+          register: sqlcmd_detect_after_linux
+          changed_when: false
+
+        - name: Set sqlcmd_bin fact (post Linux)
+          set_fact:
+            sqlcmd_bin: "{{ sqlcmd_detect_after_linux.stdout | trim }}"
+          changed_when: false
+
+        - name: Collect waits AFTER (Linux)
+          shell: |
+            set -e
+            {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d {{ db_name }} -C \
+              -Q "SELECT TOP 50 * FROM sys.dm_os_wait_stats ORDER BY wait_time_ms DESC;" -s "," -W
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          register: waits_after_linux
+          no_log: true
+
+        - name: Save waits AFTER to file (Linux)
+          copy:
+            dest: "/tmp/wait_stats_after_{{ run_id }}.csv"
+            content: "{{ waits_after_linux.stdout }}"
+
+        - name: Fetch waits AFTER (Linux)
+          fetch:
+            src: "/tmp/wait_stats_after_{{ run_id }}.csv"
+            dest: "{{ out_dir }}/"
+            flat: true
+
+        - name: Copy XE STOP and EXPORT scripts to SQL host (Linux)
+          copy:
+            src: "{{ playbook_dir }}/../../sql/{{ item }}"
+            dest: "/tmp/{{ item }}"
+          loop:
+            - xe_stop.sql
+            - xe_export_deadlocks.sql
+          when: (xe | default(0) | int) == 1
+
+        - name: Stop XE session (Linux)
+          shell: |
+            set -e
+            {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d master -C -i /tmp/xe_stop.sql
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Validate XE session stopped (Linux)
+          shell: |
+            set -e
+            out=$({{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d master -C -h -1 -W -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM sys.dm_xe_sessions WHERE name='InstantPaymentBenchXe'")
+            count=$(echo "$out" | tr -d '[:space:]')
+            if [ "$count" -gt 0 ]; then
+              exit 1
+            fi
+            exit 0
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Export deadlocks to XML (Linux)
+          shell: |
+            set -e
+            {{ sqlcmd_bin }} -S localhost -U {{ sql_login_user_resolved }} -P "$MSSQL_SA_PASSWORD" -d master -C -i /tmp/xe_export_deadlocks.sql -v xe_path="{{ xe_target }}" -o "{{ xe_export_file }}" -f 65001
+          environment:
+            MSSQL_SA_PASSWORD: "{{ mssql_sa_password }}"
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Fetch XE deadlocks XML (Linux)
+          fetch:
+            src: "{{ xe_export_file }}"
+            dest: "{{ out_dir }}/xe/xe_deadlocks_{{ run_id }}.xml"
+            flat: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Find raw XEL files (Linux)
+          find:
+            paths: "{{ xe_base_path }}"
+            patterns: "{{ xe_prefix }}*.xel"
+          register: fetch_xel_linux
+          when: (xe | default(0) | int) == 1
+
+        - name: Fetch raw XEL files (Linux)
+          fetch:
+            src: "{{ item.path }}"
+            dest: "{{ out_dir }}/xe/raw/"
+            flat: true
+          loop: "{{ (fetch_xel_linux.files | default([])) }}"
+          when: (xe | default(0) | int) == 1
+
+    - name: Windows SQL tasks (post)
+      when: ansible_facts['os_family'] == 'Windows'
+      become: false
+      block:
+        - name: Detect sqlcmd location (Windows post) - fast
+          ansible.windows.win_shell: |
+            where.exe sqlcmd
+          register: sqlcmd_where_after
+          changed_when: false
+          failed_when: false
+
+        - name: Detect sqlcmd location (Windows post) - fallback
+          ansible.windows.win_shell: |
+            $cmd = Get-Command sqlcmd.exe -ErrorAction SilentlyContinue
+            if ($cmd) { $cmd.Source } else { "" }
+          register: sqlcmd_cmd_after
+          changed_when: false
+          failed_when: false
+          when: (sqlcmd_where_after.rc | default(1)) != 0 or (sqlcmd_where_after.stdout | default('') | trim) == ""
+
+        - name: Set sqlcmd_bin fact (Windows post)
+          set_fact:
+            sqlcmd_bin: >-
+              {{
+                ((sqlcmd_where_after.stdout_lines | default(['']))[0] | trim)
+                if ((sqlcmd_where_after.stdout_lines | default([])) | length > 0 and ((sqlcmd_where_after.stdout_lines | default(['']))[0] | trim) != '')
+                else
+                (sqlcmd_cmd_after.stdout | default('') | trim)
+              }}
+          changed_when: false
+
+        - name: Fail if sqlcmd not found (Windows post)
+          fail:
+            msg: "sqlcmd.exe not found on Windows SQL host. Install SQLCMD (mssql-tools/sqlcmd) or ensure it is in PATH."
+          when: (sqlcmd_bin | default('') | trim) == ""
+
+        - name: Collect waits AFTER (Windows)
+          block:
+            - name: Run wait stats query (Windows)
+              ansible.windows.win_shell: |
+                $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+                & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d {{ db_name }} -C -Q "SELECT TOP 50 * FROM sys.dm_os_wait_stats ORDER BY wait_time_ms DESC;" -s "," -W
+              register: waits_after_win
+              no_log: true
+
+          rescue:
+            - name: Write diagnostic marker on controller (Windows AFTER)
+              ansible.builtin.copy:
+                dest: "{{ out_dir }}/sqlcmd_windows_after_error_{{ run_id }}.txt"
+                content: |
+                  sqlcmd failed collecting dm_os_wait_stats AFTER on Windows.
+                  Likely causes:
+                  - Login mismatch (using user: {{ sql_login_user_resolved }})
+                  - Missing permission VIEW SERVER STATE for dm_os_wait_stats
+                  Fix (run once as sysadmin):
+                    GRANT VIEW SERVER STATE TO [{{ sql_login_user_resolved }}];
+              delegate_to: localhost
+
+            - name: Fail with actionable hint (Windows AFTER)
+              ansible.builtin.fail:
+                msg: >-
+                  sqlcmd failed on Windows collecting dm_os_wait_stats AFTER.
+                  Most likely login mismatch ({{ sql_login_user_resolved }}) or missing VIEW SERVER STATE.
+                  See {{ out_dir }}/sqlcmd_windows_after_error_{{ run_id }}.txt for hints.
+
+        - name: Save waits AFTER directly on controller (Windows)
+          ansible.builtin.copy:
+            dest: "{{ out_dir }}/wait_stats_after_{{ run_id }}.csv"
+            content: "{{ waits_after_win.stdout | default('') }}"
+          delegate_to: localhost
+
+        - name: Copy XE STOP and EXPORT scripts to Temp (Windows)
+          ansible.windows.win_copy:
+            src: "{{ playbook_dir }}/../../sql/{{ item }}"
+            dest: "C:\\Windows\\Temp\\{{ item }}"
+          loop:
+            - xe_stop.sql
+            - xe_export_deadlocks.sql
+          when: (xe | default(0) | int) == 1
+
+        - name: Stop XE session (Windows)
+          ansible.windows.win_shell: |
+            $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+            & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d master -C -i "C:\Windows\Temp\xe_stop.sql"
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Validate XE session stopped (Windows)
+          ansible.windows.win_shell: |
+            $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+            $out = & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d master -C -h -1 -W -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM sys.dm_xe_sessions WHERE name='InstantPaymentBenchXe'"
+            $out = $out.Trim()
+            if ([int]$out -gt 0) {
+              exit 1
+            }
+            exit 0
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Export deadlocks to XML (Windows)
+          ansible.windows.win_shell: |
+            $xePath = "{{ xe_target }}"
+            $sql = (Get-Content "C:\Windows\Temp\xe_export_deadlocks.sql" -Raw) -replace '\$\(xe_path\)', $xePath
+            $tmpSql = "C:\Windows\Temp\xe_export_deadlocks_resolved.sql"
+            $sql | Set-Content $tmpSql -Encoding UTF8
+            $env:SQLCMDPASSWORD = '{{ mssql_sa_password }}'
+            & "{{ sqlcmd_bin }}" -b -S localhost -U {{ sql_login_user_resolved }} -d master -C -i $tmpSql -o "{{ xe_export_file }}" -f 65001
+          no_log: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Fetch XE deadlocks XML (Windows)
+          ansible.builtin.fetch:
+            src: "{{ xe_export_file }}"
+            dest: "{{ out_dir }}/xe/xe_deadlocks_{{ run_id }}.xml"
+            flat: true
+          when: (xe | default(0) | int) == 1
+
+        - name: Find raw XEL files (Windows)
+          ansible.windows.win_find:
+            paths: "{{ xe_base_path }}"
+            patterns: "{{ xe_prefix }}*.xel"
+          register: fetch_xel_win
+          when: (xe | default(0) | int) == 1
+
+        - name: Fetch raw XEL files (Windows)
+          ansible.builtin.fetch:
+            src: "{{ item.path }}"
+            dest: "{{ out_dir }}/xe/raw/"
+            flat: true
+          loop: "{{ (fetch_xel_win.files | default([])) }}"
+          when: (xe | default(0) | int) == 1
+
+    - name: Write local marker file
+      copy:
+        dest: "{{ out_dir }}/xe/raw/_count.txt"
+        content: |
+          count={{ (((fetch_xel_linux | default({'files': []})).files | default([])) | length) + (((fetch_xel_win | default({'files': []})).files | default([])) | length) }}
+          pattern={{ (xe_prefix | default('xe_unknown')) }}*.xel
+          xe_base_path={{ (xe_base_path | default('unknown_path')) }}
+      delegate_to: localhost
+      when: (xe | default(0) | int) == 1

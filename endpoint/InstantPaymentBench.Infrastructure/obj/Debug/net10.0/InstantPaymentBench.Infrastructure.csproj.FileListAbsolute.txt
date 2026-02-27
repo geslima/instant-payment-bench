@@ -1,0 +1,15 @@
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantPaymentBench.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantPaymentBench.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantPaymentBench.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantPaymentBench.Infrastructure.AssemblyInfo.cs
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantPaymentBench.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\bin\Debug\net10.0\InstantPaymentBench.Infrastructure.deps.json
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\bin\Debug\net10.0\InstantPaymentBench.Infrastructure.dll
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\bin\Debug\net10.0\InstantPaymentBench.Infrastructure.pdb
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\bin\Debug\net10.0\InstantPaymentBench.Application.dll
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\bin\Debug\net10.0\InstantPaymentBench.Application.pdb
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantP.053F6BE2.Up2Date
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantPaymentBench.Infrastructure.dll
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\refint\InstantPaymentBench.Infrastructure.dll
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\InstantPaymentBench.Infrastructure.pdb
+C:\Users\gessi\Projetos\bench\endpoint\InstantPaymentBench.Infrastructure\obj\Debug\net10.0\ref\InstantPaymentBench.Infrastructure.dll

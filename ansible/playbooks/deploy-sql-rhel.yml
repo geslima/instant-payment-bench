@@ -1,0 +1,195 @@
+---
+- name: Deploy SQL Server (RHEL) - Create Database + Seed
+  hosts: sql_linux
+  become: true
+  vars:
+    sql_scripts_dir: /home/benchadmin/sql
+    sql_backup_dir: /var/opt/mssql/backups/benchtest
+    db_name: InstantPaymentBench
+
+  tasks:
+    - name: Create benchadmin SQL login
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -Q "IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'benchadmin')
+            BEGIN
+              CREATE LOGIN [benchadmin] WITH PASSWORD = '{{ sql_auth_password }}';
+              ALTER SERVER ROLE [sysadmin] ADD MEMBER [benchadmin];
+            END"
+      changed_when: true
+
+    - name: Create scripts directory
+      ansible.builtin.file:
+        path: "{{ sql_scripts_dir }}"
+        state: directory
+        owner: benchadmin
+        group: benchadmin
+        mode: "0755"
+
+    - name: Copy SQL scripts
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../sql/{{ item }}"
+        dest: "{{ sql_scripts_dir }}/{{ item }}"
+        owner: benchadmin
+        group: benchadmin
+        mode: "0644"
+      loop:
+        - 00_create_database.sql
+        - 01_seed.sql
+        - 02_query_ids.sql
+
+    - name: Run CREATE DATABASE
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -i {{ sql_scripts_dir }}/00_create_database.sql -b
+      register: ddl_result
+
+    - name: Show DDL output
+      ansible.builtin.debug:
+        msg: "{{ ddl_result.stdout_lines }}"
+
+    - name: Run SEED
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -i {{ sql_scripts_dir }}/01_seed.sql -b
+      register: seed_result
+
+    - name: Show SEED output
+      ansible.builtin.debug:
+        msg: "{{ seed_result.stdout_lines }}"
+
+    - name: Ensure backup directory exists
+      ansible.builtin.file:
+        path: "{{ sql_backup_dir }}"
+        state: directory
+        owner: mssql
+        group: mssql
+        mode: "0755"
+
+    - name: Take FULL backup
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -Q "BACKUP DATABASE [{{ db_name }}]
+            TO DISK = N'{{ sql_backup_dir }}/{{ db_name }}_full.bak'
+            WITH INIT, COMPRESSION, STATS = 5;" -b
+      register: full_backup_result
+      changed_when: true
+
+    - name: Show FULL backup output
+      ansible.builtin.debug:
+        msg: "{{ full_backup_result.stdout_lines }}"
+
+    - name: Query Hot Account IDs
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -i {{ sql_scripts_dir }}/02_query_ids.sql -h -1 -W -b
+      register: ids_result
+
+    - name: Parse Hot Accounts
+      ansible.builtin.set_fact:
+        hot_accounts: "{{ ids_result.stdout_lines | select('match', '^HOT_ACCOUNT\\|') | list }}"
+
+    - name: Save seed IDs to local file
+      ansible.builtin.copy:
+        content: |
+          ---
+          hot_accounts:
+          {% for line in hot_accounts %}
+            - "{{ line }}"
+          {% endfor %}
+        dest: "{{ playbook_dir }}/../seed-ids.yml"
+      delegate_to: localhost
+      become: false
+
+    - name: Show captured IDs
+      ansible.builtin.debug:
+        msg:
+          - "HotAccounts: {{ hot_accounts }}"
+
+- name: Reset database (between tests)
+  hosts: sql_linux
+  become: true
+  tags: [reset, never]
+  vars:
+    sql_scripts_dir: /home/benchadmin/sql
+    db_name: InstantPaymentBench
+
+  tasks:
+    - name: Run CREATE DATABASE
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -i {{ sql_scripts_dir }}/00_create_database.sql -b
+      register: ddl_result
+
+    - name: Show DDL output
+      ansible.builtin.debug:
+        msg: "{{ ddl_result.stdout_lines }}"
+
+    - name: Run SEED
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd
+        -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -i {{ sql_scripts_dir }}/01_seed.sql -b
+      register: seed_result
+
+    - name: Show SEED output
+      ansible.builtin.debug:
+        msg: "{{ seed_result.stdout_lines }}"
+
+- name: Cleanup XE Deadlocks
+  hosts: sql_linux
+  become: true
+  tags: [xe_cleanup, never]
+  tasks:
+    - name: Remove Deadlock XEL files
+      ansible.builtin.shell: rm -f /var/opt/mssql/log/InstantPaymentBench_Deadlocks*.xel
+
+- name: Tune SQL Server instance (RHEL) - align with Windows
+  hosts: sql_linux
+  become: true
+  tags: [tune, never]
+  vars:
+    sqlcmd_bin: /opt/mssql-tools18/bin/sqlcmd
+    maxdop: 8
+    max_server_memory_mb: 51200
+    cost_threshold_parallelism: 50
+    optimize_for_adhoc: 1
+  tasks:
+    - name: Apply sp_configure baseline
+      ansible.builtin.command: >
+        {{ sqlcmd_bin }} -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -Q "
+        EXEC sp_configure 'show advanced options', 1; RECONFIGURE;
+        EXEC sp_configure 'max degree of parallelism', {{ maxdop }}; RECONFIGURE;
+        EXEC sp_configure 'max server memory (MB)', {{ max_server_memory_mb }}; RECONFIGURE;
+        EXEC sp_configure 'cost threshold for parallelism', {{ cost_threshold_parallelism }}; RECONFIGURE;
+        EXEC sp_configure 'optimize for ad hoc workloads', {{ optimize_for_adhoc }}; RECONFIGURE;
+        "
+      changed_when: true
+
+    - name: Verify sp_configure settings
+      ansible.builtin.command: >
+        {{ sqlcmd_bin }} -S localhost -U sa -P '{{ sql_auth_password }}' -C
+        -Q "
+        SELECT name, CAST(value_in_use AS INT) AS value_in_use
+        FROM sys.configurations
+        WHERE name IN (
+          'max degree of parallelism',
+          'max server memory (MB)',
+          'optimize for ad hoc workloads',
+          'cost threshold for parallelism'
+        )
+        ORDER BY name;
+        "
+      register: sp_config
+      changed_when: false
+
+    - name: Show sp_configure
+      ansible.builtin.debug:
+        var: sp_config.stdout_lines      

@@ -1,0 +1,15 @@
+run_id=20260225_222434
+k6_script=main-exhaustion.js
+vu_scale=5
+diag=1
+clear_waits=1
+db_name=InstantPaymentBench
+results_dir=/home/ges/projetos/instant-payment-bench/ansible/results
+out_dir=/home/ges/projetos/instant-payment-bench/ansible/results/20260225_222434
+xe=1
+xe_base_path=C:\ProgramData\InstantPaymentBenchXe
+xe_prefix=xe_20260225_222434
+xe_target=C:\ProgramData\InstantPaymentBenchXe\xe_20260225_222434
+xe_export_file=C:\ProgramData\InstantPaymentBenchXe\xe_deadlocks_20260225_222434.xml
+sql_host=4.242.16.187
+sql_os_family=Windows

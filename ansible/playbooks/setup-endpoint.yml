@@ -1,0 +1,58 @@
+---
+- name: Setup Endpoint VM
+  hosts: endpoint
+  become: true
+
+  tasks:
+    - name: Install .NET SDK 10.0
+      ansible.builtin.dnf:
+        name: dotnet-sdk-10.0
+        state: present
+
+    - name: Verify .NET
+      ansible.builtin.command: dotnet --version
+      register: dotnet_check
+      changed_when: false
+
+    - name: Show .NET version
+      ansible.builtin.debug:
+        msg: "{{ dotnet_check.stdout }}"
+
+    - name: Set sysctl parameters for high concurrency
+      ansible.posix.sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        sysctl_set: true
+        state: present
+        reload: true
+      loop:
+        - { key: "net.core.somaxconn",           value: "65535" }
+        - { key: "net.ipv4.tcp_max_syn_backlog",  value: "65535" }
+        - { key: "net.core.netdev_max_backlog",   value: "65535" }
+        - { key: "net.ipv4.ip_local_port_range",  value: "1024 65535" }
+        - { key: "net.ipv4.tcp_tw_reuse",         value: "1" }
+
+    - name: Set file descriptor limits
+      ansible.builtin.copy:
+        dest: /etc/security/limits.d/90-benchtest.conf
+        content: |
+          benchadmin soft nofile 65535
+          benchadmin hard nofile 65535
+          benchadmin soft nproc  65535
+          benchadmin hard nproc  65535
+        mode: "0644"
+
+    - name: Open port 5000 for API
+      ansible.posix.firewalld:
+        port: 5000/tcp
+        permanent: true
+        immediate: true
+        state: enabled
+
+    - name: Create /opt/benchtest directory
+      ansible.builtin.file:
+        path: /opt/benchtest
+        state: directory
+        owner: benchadmin
+        group: benchadmin
+        mode: "0755"

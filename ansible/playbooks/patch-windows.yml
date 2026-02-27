@@ -1,0 +1,76 @@
+---
+- name: Patch Windows
+  hosts: sql_win
+  vars:
+    ansible_winrm_operation_timeout_sec: 300
+    ansible_winrm_read_timeout_sec: 600
+
+  tasks:
+    - name: Windows Update Block
+      when: do_windows_update
+      block:
+        - name: Search for available updates
+          ansible.windows.win_updates:
+            category_names:
+              - SecurityUpdates
+              - CriticalUpdates
+              - UpdateRollups
+            state: searched
+          register: search_result
+
+        - name: Show pending updates
+          ansible.builtin.debug:
+            msg: "{{ search_result.found_update_count | default(0) }} updates found: {{ (search_result.updates | default({})).values() | map(attribute='title') | list }}"
+
+        - name: End play if no updates
+          ansible.builtin.meta: end_play
+          when: (search_result.found_update_count | default(0)) == 0
+
+        - name: Download updates
+          ansible.windows.win_updates:
+            category_names:
+              - SecurityUpdates
+              - CriticalUpdates
+              - UpdateRollups
+            state: downloaded
+          register: download_result
+
+        - name: Show downloaded updates
+          ansible.builtin.debug:
+            msg: "{{ download_result.found_update_count | default(0) }} updates downloaded"
+
+        - name: Install updates
+          ansible.windows.win_updates:
+            category_names:
+              - SecurityUpdates
+              - CriticalUpdates
+              - UpdateRollups
+            state: installed
+            reboot: false
+          register: install_result
+          retries: 2
+          delay: 60
+          until: install_result is not failed
+
+        - name: Show installed updates
+          ansible.builtin.debug:
+            msg: "{{ install_result.installed_update_count | default(0) }} updates installed - reboot needed: {{ install_result.reboot_required | default(false) }}"
+
+        - name: Reboot if required
+          ansible.windows.win_reboot:
+            reboot_timeout: 3600
+            post_reboot_delay: 60
+          when: install_result.reboot_required | default(false)
+
+        - name: Check for remaining updates
+          ansible.windows.win_updates:
+            category_names:
+              - SecurityUpdates
+              - CriticalUpdates
+              - UpdateRollups
+            state: searched
+          register: final_check
+
+        - name: Show final status
+          ansible.builtin.debug:
+            msg: "Patching complete - {{ final_check.found_update_count | default(0) }} updates remaining"

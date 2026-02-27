@@ -1,0 +1,3 @@
+count=1
+pattern=xe_20260227_133338*.xel
+xe_base_path=/var/opt/mssql/log/InstantPaymentBenchXe

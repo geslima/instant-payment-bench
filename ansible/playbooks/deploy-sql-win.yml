@@ -1,0 +1,165 @@
+---
+- name: Deploy SQL Server (Windows) - Create Database + Seed
+  hosts: sql_win
+  become: false
+  vars:
+    ansible_winrm_operation_timeout_sec: 300
+    ansible_winrm_read_timeout_sec: 600
+    sql_scripts_dir: 'C:\BenchTest\sql'
+    sql_backup_dir: 'C:\BenchTest\backups'
+    db_name: InstantPaymentBench
+
+
+    sql_files:
+      - 00_create_database.sql
+      - 01_seed.sql
+      - 02_query_ids.sql
+
+  pre_tasks:
+
+    - name: Ensure sql_auth_password is provided
+      ansible.builtin.assert:
+        that:
+          - sql_auth_password is defined
+          - (sql_auth_password | string | length) > 0
+        fail_msg: "Defina sql_auth_password via -e, vault, inventory, etc."
+      no_log: true
+
+  tasks:
+    - name: Set cost threshold for parallelism to 50
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        sqlcmd -S localhost -U benchadmin -C -Q "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'cost threshold for parallelism', 50; RECONFIGURE;" -b
+      register: ctp_result
+      no_log: true
+
+    - name: Create scripts directory
+      ansible.windows.win_file:
+        path: "{{ sql_scripts_dir }}"
+        state: directory
+
+    - name: Verify SQL scripts exist on controller
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/../../sql/{{ item }}"
+      loop: "{{ sql_files }}"
+      delegate_to: localhost
+      register: script_stats
+
+    - name: Fail if any SQL script is missing on controller
+      ansible.builtin.fail:
+        msg: "Arquivo SQL não encontrado no controller: {{ item.item }} (path={{ item.stat.path }})"
+      loop: "{{ script_stats.results }}"
+      when: not item.stat.exists
+      delegate_to: localhost
+
+    - name: Copy SQL scripts
+      ansible.windows.win_copy:
+        src: "{{ playbook_dir }}/../../sql/{{ item }}"
+        dest: "{{ sql_scripts_dir }}\\"
+      loop: "{{ sql_files }}"
+
+    - name: Ensure backup directory exists
+      ansible.windows.win_file:
+        path: "{{ sql_backup_dir }}"
+        state: directory
+
+    - name: Drop database if it exists (clean start)
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        $query = @"
+        IF DB_ID(N'{{ db_name }}') IS NOT NULL
+        BEGIN
+          ALTER DATABASE [{{ db_name }}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+          DROP DATABASE [{{ db_name }}];
+          SELECT 1 AS Dropped;
+        END
+        ELSE
+        BEGIN
+          SELECT 0 AS Dropped;
+        END
+        "@
+        sqlcmd -S localhost -U benchadmin -C -h -1 -W -Q $query -b
+      register: dropdb_result
+      changed_when: dropdb_result.stdout is search('1')
+      no_log: true
+
+    - name: Run CREATE DATABASE
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        sqlcmd -S localhost -U benchadmin -C -i "{{ sql_scripts_dir }}\00_create_database.sql" -b
+      no_log: true
+
+    - name: Run SEED
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        sqlcmd -S localhost -U benchadmin -C -i "{{ sql_scripts_dir }}\01_seed.sql" -b
+      no_log: true
+
+    - name: Detect running SQL Server service identity
+      ansible.windows.win_powershell:
+        script: |
+          $svc = Get-CimInstance Win32_Service |
+                Where-Object { $_.Name -like 'MSSQL*' -and $_.State -eq 'Running' } |
+                Select-Object -First 1
+          if (-not $svc) { throw "SQL Service not found" }
+          [pscustomobject]@{
+            ServiceName = $svc.Name
+            StartName   = $svc.StartName
+          }
+      register: sql_svc
+
+    - name: Set SQL Server service account facts
+      ansible.builtin.set_fact:
+        sql_service_account: "{{ sql_svc.output[0].StartName }}"
+
+    - name: Grant SQL Server service identity ACL
+      ansible.windows.win_acl:
+        path: "{{ sql_backup_dir }}"
+        user: "{{ sql_service_account }}"
+        rights: FullControl
+        type: allow
+        state: present
+
+    - name: Take FULL backup
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        sqlcmd -S localhost -U benchadmin -C -Q "BACKUP DATABASE [{{ db_name }}] TO DISK = N'{{ sql_backup_dir }}\{{ db_name }}_full.bak' WITH INIT, COMPRESSION, STATS = 5;" -b
+      no_log: true
+
+    - name: Query Hot Account IDs
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        sqlcmd -S localhost -U benchadmin -C -i "{{ sql_scripts_dir }}\02_query_ids.sql" -h -1 -W -b
+      register: ids_result
+      no_log: true
+
+    - name: Save seed IDs to local file
+      ansible.builtin.copy:
+        content: |
+          ---
+          hot_accounts:
+          {% for line in (ids_result.stdout_lines | select('match', '^HOT_ACCOUNT\\|') | list) %}
+            - "{{ line }}"
+          {% endfor %}
+        dest: "{{ playbook_dir }}/../seed-ids.yml"
+      delegate_to: localhost
+
+
+- name: Reset database (between tests)
+  hosts: sql_win
+  become: false
+  tags: [reset, never]
+  vars:
+    sql_scripts_dir: 'C:\BenchTest\sql'
+  tasks:
+    - name: Run CREATE DATABASE
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        sqlcmd -S localhost -U benchadmin -C -i "{{ sql_scripts_dir }}\00_create_database.sql" -b
+      no_log: true
+
+    - name: Run SEED
+      ansible.windows.win_shell: |
+        $env:SQLCMDPASSWORD = '{{ sql_auth_password }}'
+        sqlcmd -S localhost -U benchadmin -C -i "{{ sql_scripts_dir }}\01_seed.sql" -b
+      no_log: true

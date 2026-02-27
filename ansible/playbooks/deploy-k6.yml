@@ -1,0 +1,53 @@
+---
+- name: Deploy k6 scripts
+  hosts: k6
+  become: true
+
+  vars:
+    k6_dir: /opt/k6
+
+  pre_tasks:
+    - name: Load seed IDs
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/../seed-ids.yml"
+      delegate_to: localhost
+      become: false
+
+    - name: Parse hot accounts from raw lines
+      ansible.builtin.set_fact:
+        hot_accounts: >-
+          {%- set result = [] -%}
+          {%- for line in hot_accounts -%}
+            {%- set parts = line.split('|') -%}
+            {%- set _ = result.append(parts[1] | trim) -%}
+          {%- endfor -%}
+          {{ result }}
+
+    - name: Show parsed config
+      ansible.builtin.debug:
+        msg:
+          - "Endpoint: {{ hostvars[groups['endpoint'][0]].endpoint_private_ip | default('CHECK endpoint_private_ip') }}"
+          - "HotAccounts: {{ hot_accounts }}"
+
+  tasks:
+    - name: Copy k6 scripts
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../k6/"
+        dest: "{{ k6_dir }}/"
+        owner: benchadmin
+        group: benchadmin
+        mode: "0755"
+
+    - name: Template k6 run script
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/k6-run.sh.j2"
+        dest: "{{ k6_dir }}/run.sh"
+        owner: benchadmin
+        group: benchadmin
+        mode: "0755"
+      vars:
+        endpoint_private_ip: "{{ hostvars[groups['endpoint'][0]].endpoint_private_ip | default('10.10.1.4') }}"
+
+    - name: Show run command
+      ansible.builtin.debug:
+        msg: "SSH into k6 VM and run: /opt/k6/run.sh main-exhaustion.js"

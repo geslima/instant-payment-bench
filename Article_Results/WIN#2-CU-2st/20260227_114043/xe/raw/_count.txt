@@ -1,0 +1,3 @@
+count=1
+pattern=xe_20260227_114043*.xel
+xe_base_path=C:\ProgramData\InstantPaymentBenchXe

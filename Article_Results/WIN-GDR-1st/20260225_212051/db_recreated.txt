@@ -1,0 +1,11 @@
+Timestamp: 2026-02-25T21:21:24-03:00
+Deploy Path: Windows
+Database: InstantPaymentBench
+Baseline Row Counts:
+Tbl         Cnt        
+----------- -----------
+Account          100000
+LedgerEntry           0
+Transfer              0
+
+(3 rows affected)

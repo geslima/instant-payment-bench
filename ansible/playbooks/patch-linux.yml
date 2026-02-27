@@ -1,0 +1,18 @@
+---
+- name: Patch Linux
+  hosts: linux
+  become: true
+
+  tasks:
+    - name: Linux Update Block
+      when: do_linux_update | bool
+      block:
+        - name: Update all packages
+          ansible.builtin.dnf:
+            name: "*"
+            state: latest
+            update_cache: true
+
+        - name: Reboot
+          ansible.builtin.reboot:
+            reboot_timeout: 300

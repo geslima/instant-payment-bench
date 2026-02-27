@@ -1,0 +1,713 @@
+---
+- name: Install SQL Server on RHEL
+  hosts: sql_linux
+  become: true
+  gather_facts: true
+
+  vars:
+
+    strict_tempdb: true
+    mssql_accept_microsoft_odbc_driver_17_for_sql_server_eula: true
+    mssql_accept_microsoft_cli_utilities_for_sql_server_eula: true
+    mssql_accept_microsoft_sql_server_standard_eula: true
+    mssql_edition: Developer
+    mssql_tcp_port: 1433
+    mssql_manage_firewall: true
+    mssql_enable_sql_agent: true
+    mssql_install_fts: true
+    mssql_install_powershell: true
+    mssql_tune_for_fua_storage: true
+    mssql_datadir: /mnt/sqldata
+    mssql_logdir: /mnt/sqllog
+    mssql_tempdir: /mnt/sqltempdb
+    mssql_password: "{{ sql_auth_password }}"
+
+  tasks:
+
+
+
+    - name: Show system information
+      ansible.builtin.debug:
+        msg: |
+          Hostname:  {{ ansible_hostname }}
+          OS:        {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Kernel:    {{ ansible_kernel }}
+          CPU:       {{ ansible_processor_vcpus }} vCPUs
+          RAM:       {{ (ansible_memtotal_mb / 1024) | round(1) }} GB
+
+    - name: Update all OS packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        update_cache: true
+      register: os_update
+      when: do_linux_update | default(false) | bool
+
+    - name: Install sysstat (iostat, mpstat, sar) for benchmark diagnostics
+      ansible.builtin.dnf:
+        name: sysstat
+        state: present
+      register: sysstat_install
+
+    - name: Install bcc-tools
+      ansible.builtin.dnf:
+        name: bcc-tools
+        state: present
+      register: bcc_tools_install
+
+    - name: Check if kernel was updated
+      ansible.builtin.shell: |
+        RUNNING=$(uname -r)
+        INSTALLED=$(rpm -q --last kernel-core 2>/dev/null | head -1 | awk '{print $1}' | sed 's/kernel-core-//')
+        [ "$RUNNING" != "$INSTALLED" ] && echo "REBOOT_NEEDED" || echo "OK"
+      register: kernel_check
+      changed_when: false
+
+    - name: Reboot if kernel was updated
+      ansible.builtin.reboot:
+        msg: "Reboot after kernel update"
+        reboot_timeout: 300
+        post_reboot_delay: 30
+        test_command: uptime
+      when: kernel_check.stdout == "REBOOT_NEEDED"
+
+    - name: Re-gather facts after reboot
+      ansible.builtin.setup:
+      when: kernel_check.stdout == "REBOOT_NEEDED"
+
+
+
+
+    - name: Verify data and log disks are mounted
+      ansible.builtin.command: df -h /mnt/sqldata /mnt/sqllog
+      register: disk_check
+      changed_when: false
+      failed_when: false
+
+    - name: Show disk layout
+      ansible.builtin.debug:
+        var: disk_check.stdout_lines
+
+    - name: Fail if data/log disks are not mounted
+      ansible.builtin.fail:
+        msg: "Disks /mnt/sqldata and /mnt/sqllog are not mounted. Check Terraform disk-init."
+      when: disk_check.rc != 0
+
+    - name: Disable Transparent Huge Pages (THP) immediately
+      ansible.builtin.shell: |
+        echo never > /sys/kernel/mm/transparent_hugepage/enabled
+        echo never > /sys/kernel/mm/transparent_hugepage/defrag
+      changed_when: true
+
+    - name: Create THP disable systemd service (persist across reboots)
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=Disable Transparent Huge Pages for SQL Server OLTP
+          DefaultDependencies=no
+          After=sysinit.target local-fs.target
+          Before=mssql-server.service
+
+          [Service]
+          Type=oneshot
+          ExecStart=/bin/bash -c 'echo never > /sys/kernel/mm/transparent_hugepage/enabled && echo never > /sys/kernel/mm/transparent_hugepage/defrag'
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/disable-thp.service
+        mode: '0644'
+
+    - name: Enable and start THP disable service
+      ansible.builtin.systemd:
+        name: disable-thp
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Create NVMe local TempDB setup script
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+          set -euo pipefail
+          MOUNT_POINT="/mnt/sqltempdb"
+          mkdir -p "$MOUNT_POINT"
+
+          # Se já está montado, apenas garante permissões e sai
+          if mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
+            echo "NVMe local already mounted at $MOUNT_POINT"
+            chown mssql:mssql "$MOUNT_POINT" 2>/dev/null || true
+            exit 0
+          fi
+
+          # Detecta o disco NVMe local (efêmero) do Azure
+          NVME_DEV=""
+          for dev in /dev/nvme*n1; do
+            [ -b "$dev" ] || continue
+            model=""
+            model=$(cat "/sys/block/$(basename "$dev")/device/model" 2>/dev/null | xargs) || true
+            if [ -z "$model" ]; then
+              ctrl=$(basename "$(readlink -f "/sys/block/$(basename "$dev")/device")" 2>/dev/null) || true
+              model=$(cat "/sys/class/nvme/${ctrl}/model" 2>/dev/null | xargs) || true
+            fi
+
+            if echo "$model" | grep -qiE "Direct Disk|Local Disk|Ephemeral"; then
+              NVME_DEV="$dev"
+              break
+            fi
+            if echo "$model" | grep -qi "NVMe" && ! echo "$model" | grep -qi "Accelerator"; then
+              NVME_DEV="$dev"
+              break
+            fi
+          done
+
+          if [ -z "$NVME_DEV" ]; then
+            echo "WARNING: NVMe local disk not found. TempDB will use OS disk."
+            exit 0
+          fi
+
+          # Desmonta o disco de qualquer ponto atual (ex: /mnt/resource montado pelo waagent)
+          # O || true evita que findmnt com exit 1 (sem resultados) aborte o script
+          CURRENT_MOUNTS=$(findmnt -rn -o TARGET -S "$NVME_DEV" 2>/dev/null || true)
+          for m in $CURRENT_MOUNTS; do
+            if [ "$m" != "$MOUNT_POINT" ]; then
+              echo "Unmounting $NVME_DEV from $m..."
+              umount -l "$m" || true
+            fi
+          done
+
+          # Aguarda o desmount propagar
+          sleep 1
+
+          if ! blkid -s TYPE "$NVME_DEV" 2>/dev/null | grep -q xfs; then
+            echo "Formatting $NVME_DEV as XFS..."
+            mkfs.xfs -f "$NVME_DEV"
+          fi
+
+          echo "Mounting $NVME_DEV at $MOUNT_POINT..."
+          mount -o noatime,nodiratime "$NVME_DEV" "$MOUNT_POINT"
+          chown mssql:mssql "$MOUNT_POINT" 2>/dev/null || true
+          chmod 755 "$MOUNT_POINT"
+          echo "NVMe local ready: $NVME_DEV -> $MOUNT_POINT"
+        dest: /usr/local/bin/setup-sqltempdb.sh
+        mode: '0755'
+
+    - name: Create systemd service for NVMe TempDB setup
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=Format and mount NVMe local disk for SQL Server TempDB
+          # Deve rodar APÓS o waagent montar /mnt/resource para poder desmontá-lo
+          After=local-fs.target cloud-init.service walinuxagent.service
+          Before=mssql-server.service
+
+          [Service]
+          Type=oneshot
+          ExecStart=/bin/bash /usr/local/bin/setup-sqltempdb.sh
+          RemainAfterExit=yes
+          # Permite até 3 tentativas caso o waagent ainda esteja concorrendo
+          Restart=on-failure
+          RestartSec=5s
+          StartLimitIntervalSec=60s
+          StartLimitBurst=3
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/setup-sqltempdb.service
+        mode: '0644'
+
+    - name: Enable and start NVMe TempDB setup service
+      ansible.builtin.systemd:
+        name: setup-sqltempdb
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Verify NVMe local is mounted for TempDB
+      ansible.builtin.shell: |
+        if mountpoint -q /mnt/sqltempdb 2>/dev/null; then
+          echo "OK"
+          df -h /mnt/sqltempdb
+        else
+          echo "WARN: /mnt/sqltempdb is not a separate mount. TempDB will use OS disk."
+          mkdir -p /mnt/sqltempdb
+          chown mssql:mssql /mnt/sqltempdb 2>/dev/null || true
+        fi
+      register: tempdb_mount
+      changed_when: false
+
+    - name: Show TempDB mount status
+      ansible.builtin.debug:
+        var: tempdb_mount.stdout_lines
+
+
+
+
+    - name: Detect RHEL major version
+      ansible.builtin.set_fact:
+        rhel_major_version: "{{ ansible_distribution_major_version }}"
+
+    - name: Add SQL Server 2025 repo for RHEL 10
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/config/rhel/10/mssql-server-2025.repo
+        dest: /etc/yum.repos.d/mssql-server.repo
+        mode: '0644'
+      when: rhel_major_version == "10"
+
+    - name: Add SQL Server 2025 repo for RHEL 9
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/config/rhel/9/mssql-server-2025.repo
+        dest: /etc/yum.repos.d/mssql-server.repo
+        mode: '0644'
+      when: rhel_major_version == "9"
+
+    - name: Add tools repo
+      ansible.builtin.shell: |
+        curl -s https://packages.microsoft.com/config/rhel/9/prod.repo \
+          | tee /etc/yum.repos.d/mssql-release.repo
+      args:
+        creates: /etc/yum.repos.d/mssql-release.repo
+
+    - name: Prepare SQL Server directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      loop:
+        - "{{ mssql_datadir }}"
+        - "{{ mssql_logdir }}"
+        - "{{ mssql_tempdir }}"
+
+    - name: Install SQL Server via microsoft.sql.server role
+      block:
+        - name: Execute role microsoft.sql.server
+          ansible.builtin.include_role:
+            name: microsoft.sql.server
+
+      rescue:
+        - name: Role failed, installing manually
+          ansible.builtin.debug:
+            msg: "The microsoft.sql.server role failed. Installing manually."
+
+        - name: Install mssql-server
+          ansible.builtin.dnf:
+            name: mssql-server
+            state: present
+          environment:
+            ACCEPT_EULA: "Y"
+
+        - name: Run mssql-conf setup
+          ansible.builtin.shell: |
+            MSSQL_SA_PASSWORD='{{ mssql_password }}' \
+            MSSQL_PID='{{ mssql_edition }}' \
+            /opt/mssql/bin/mssql-conf -n setup accept-eula
+          args:
+            creates: /var/opt/mssql/.system_key_generated
+
+        - name: Create dump directory
+          ansible.builtin.file:
+            path: "{{ mssql_datadir }}/dump"
+            state: directory
+            owner: mssql
+            group: mssql
+            mode: '0755'
+
+        - name: Set data directory
+          ansible.builtin.command: /opt/mssql/bin/mssql-conf set filelocation.defaultdatadir {{ mssql_datadir }}
+
+        - name: Set log directory
+          ansible.builtin.command: /opt/mssql/bin/mssql-conf set filelocation.defaultlogdir {{ mssql_logdir }}
+
+        - name: Set dump directory
+          ansible.builtin.command: /opt/mssql/bin/mssql-conf set filelocation.defaultdumpdir {{ mssql_datadir }}/dump
+
+        - name: Enable SQL Agent
+          ansible.builtin.command: /opt/mssql/bin/mssql-conf set sqlagent.enabled true
+
+        - name: Set TCP port
+          ansible.builtin.command: /opt/mssql/bin/mssql-conf set network.tcpport {{ mssql_tcp_port }}
+          register: port_result
+          failed_when: port_result.rc != 0 and "already in use" not in port_result.stdout
+
+        - name: Restart mssql-server (manual install)
+          ansible.builtin.systemd:
+            name: mssql-server
+            state: restarted
+            enabled: true
+
+        - name: Install mssql-tools18 and unixODBC
+          ansible.builtin.dnf:
+            name:
+              - mssql-tools18
+              - unixODBC-devel
+            state: present
+          environment:
+            ACCEPT_EULA: "Y"
+
+        - name: Open port 1433 in firewall
+          ansible.posix.firewalld:
+            port: "{{ mssql_tcp_port }}/tcp"
+            permanent: true
+            state: enabled
+            immediate: true
+          ignore_errors: true
+
+
+
+
+    - name: Set ownership of SQL Server directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: mssql
+        group: mssql
+        recurse: true
+      loop:
+        - "{{ mssql_datadir }}"
+        - "{{ mssql_logdir }}"
+        - "{{ mssql_tempdir }}"
+
+    - name: Add sqlcmd to global PATH
+      ansible.builtin.copy:
+        content: 'export PATH="$PATH:/opt/mssql-tools18/bin"'
+        dest: /etc/profile.d/mssql-tools.sh
+        mode: '0644'
+
+    - name: Enable trace flags (834=large pages, 876=compressed memory, 3979=fdatasync)
+      ansible.builtin.command: /opt/mssql/bin/mssql-conf traceflag 834 876 3979 on
+      register: result
+      changed_when: "'restart' in result.stdout"
+
+    - name: Enable alternate write-through (O_DSYNC for durability)
+      ansible.builtin.command: /opt/mssql/bin/mssql-conf set control.alternatewritethrough 1
+      register: result
+      changed_when: "'restart' in result.stdout"
+
+    - name: Enable write-through (O_DSYNC for file flag requests)
+      ansible.builtin.command: /opt/mssql/bin/mssql-conf set control.writethrough 1
+      register: result
+      changed_when: "'restart' in result.stdout"
+
+    - name: Set memory limit (51200 MB)
+      ansible.builtin.command: /opt/mssql/bin/mssql-conf set memory.memorylimitmb 51200
+      register: result
+      changed_when: "'restart' in result.stdout"
+
+    - name: Create systemd override directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/mssql-server.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Apply AmbientCapabilities for lock pages in memory
+      ansible.builtin.copy:
+        content: |
+          [Service]
+          AmbientCapabilities=CAP_IPC_LOCK
+          LimitMEMLOCK=infinity
+        dest: /etc/systemd/system/mssql-server.service.d/override.conf
+        mode: '0644'
+
+    - name: Reload systemd after override
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+
+
+
+    - name: Restart mssql-server to apply all mssql-conf settings
+      ansible.builtin.systemd:
+        name: mssql-server
+        state: restarted
+        enabled: true
+
+    - name: Wait for SQL Server to be ready
+      ansible.builtin.wait_for:
+        port: "{{ mssql_tcp_port }}"
+        host: localhost
+        delay: 5
+        timeout: 120
+
+    - name: Set MAXDOP = 8
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "EXEC sp_configure 'show advanced options', 1; RECONFIGURE;
+            EXEC sp_configure 'max degree of parallelism', 8; RECONFIGURE;"
+      register: result
+      changed_when: result.rc == 0
+      retries: 3
+      delay: 10
+
+    - name: Set max server memory (51200 MB)
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "EXEC sp_configure 'max server memory (MB)', 51200; RECONFIGURE;"
+      changed_when: true
+
+    - name: Set min server memory (0 MB)
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "EXEC sp_configure 'min server memory (MB)', 0; RECONFIGURE;"
+      changed_when: true
+
+    - name: Enable optimize for ad hoc workloads
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "EXEC sp_configure 'optimize for ad hoc workloads', 1; RECONFIGURE;"
+      changed_when: true
+
+    - name: Set cost threshold for parallelism = 50
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "EXEC sp_configure 'cost threshold for parallelism', 50; RECONFIGURE;"
+      changed_when: true
+
+    - name: Verify TempDB directory stats
+      ansible.builtin.stat:
+        path: /mnt/sqltempdb
+      register: sqltempdb_stat
+
+    - name: Assert exact TempDB pre-conditions
+      ansible.builtin.assert:
+        that:
+          - sqltempdb_stat.stat.exists
+          - sqltempdb_stat.stat.isdir
+        fail_msg: "TempDB directory missing or is not a directory."
+
+    - name: Verify strict write access for mssql user
+      ansible.builtin.copy:
+        content: "test"
+        dest: /mnt/sqltempdb/.ansible_write_test
+      become: true
+      become_user: mssql
+
+    - name: Cleanup strict write test
+      ansible.builtin.file:
+        path: /mnt/sqltempdb/.ansible_write_test
+        state: absent
+
+    - name: Verify TempDB is a mountpoint
+      ansible.builtin.command: findmnt -M /mnt/sqltempdb
+      changed_when: false
+      failed_when: false
+      register: tempdb_mountpoint
+
+    - name: Warn if TempDB is not a mountpoint
+      ansible.builtin.debug:
+        msg: "WARNING: /mnt/sqltempdb is not a separate mountpoint. TempDB is running on OS disk."
+      when: tempdb_mountpoint.rc != 0
+
+    - name: Configure TempDB (8 data files, 512 MB each, growth 256 MB)
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev, FILENAME = '{{ mssql_tempdir }}/tempdb.mdf', SIZE = 512MB, FILEGROWTH = 256MB);
+        ALTER DATABASE tempdb MODIFY FILE (NAME = templog, FILENAME = '{{ mssql_tempdir }}/templog.ldf', SIZE = 512MB, FILEGROWTH = 256MB);
+        IF NOT EXISTS (SELECT 1 FROM sys.master_files WHERE database_id = 2 AND name = 'tempdev2') ALTER DATABASE tempdb ADD FILE (NAME = tempdev2, FILENAME = '{{ mssql_tempdir }}/tempdb2.ndf', SIZE = 512MB, FILEGROWTH = 256MB); ELSE ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev2, FILENAME = '{{ mssql_tempdir }}/tempdb2.ndf', SIZE = 512MB, FILEGROWTH = 256MB);
+        IF NOT EXISTS (SELECT 1 FROM sys.master_files WHERE database_id = 2 AND name = 'tempdev3') ALTER DATABASE tempdb ADD FILE (NAME = tempdev3, FILENAME = '{{ mssql_tempdir }}/tempdb3.ndf', SIZE = 512MB, FILEGROWTH = 256MB); ELSE ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev3, FILENAME = '{{ mssql_tempdir }}/tempdb3.ndf', SIZE = 512MB, FILEGROWTH = 256MB);
+        IF NOT EXISTS (SELECT 1 FROM sys.master_files WHERE database_id = 2 AND name = 'tempdev4') ALTER DATABASE tempdb ADD FILE (NAME = tempdev4, FILENAME = '{{ mssql_tempdir }}/tempdb4.ndf', SIZE = 512MB, FILEGROWTH = 256MB); ELSE ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev4, FILENAME = '{{ mssql_tempdir }}/tempdb4.ndf', SIZE = 512MB, FILEGROWTH = 256MB);
+        IF NOT EXISTS (SELECT 1 FROM sys.master_files WHERE database_id = 2 AND name = 'tempdev5') ALTER DATABASE tempdb ADD FILE (NAME = tempdev5, FILENAME = '{{ mssql_tempdir }}/tempdb5.ndf', SIZE = 512MB, FILEGROWTH = 256MB); ELSE ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev5, FILENAME = '{{ mssql_tempdir }}/tempdb5.ndf', SIZE = 512MB, FILEGROWTH = 256MB);
+        IF NOT EXISTS (SELECT 1 FROM sys.master_files WHERE database_id = 2 AND name = 'tempdev6') ALTER DATABASE tempdb ADD FILE (NAME = tempdev6, FILENAME = '{{ mssql_tempdir }}/tempdb6.ndf', SIZE = 512MB, FILEGROWTH = 256MB); ELSE ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev6, FILENAME = '{{ mssql_tempdir }}/tempdb6.ndf', SIZE = 512MB, FILEGROWTH = 256MB);
+        IF NOT EXISTS (SELECT 1 FROM sys.master_files WHERE database_id = 2 AND name = 'tempdev7') ALTER DATABASE tempdb ADD FILE (NAME = tempdev7, FILENAME = '{{ mssql_tempdir }}/tempdb7.ndf', SIZE = 512MB, FILEGROWTH = 256MB); ELSE ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev7, FILENAME = '{{ mssql_tempdir }}/tempdb7.ndf', SIZE = 512MB, FILEGROWTH = 256MB);
+        IF NOT EXISTS (SELECT 1 FROM sys.master_files WHERE database_id = 2 AND name = 'tempdev8') ALTER DATABASE tempdb ADD FILE (NAME = tempdev8, FILENAME = '{{ mssql_tempdir }}/tempdb8.ndf', SIZE = 512MB, FILEGROWTH = 256MB); ELSE ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev8, FILENAME = '{{ mssql_tempdir }}/tempdb8.ndf', SIZE = 512MB, FILEGROWTH = 256MB);
+        "
+      register: tempdb_result
+      changed_when: true
+
+
+
+
+
+
+
+    - name: Relocate all TempDB files to NVMe local (idempotent)
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev,  FILENAME = '{{ mssql_tempdir }}/tempdb.mdf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = templog,  FILENAME = '{{ mssql_tempdir }}/templog.ldf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev2, FILENAME = '{{ mssql_tempdir }}/tempdb2.ndf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev3, FILENAME = '{{ mssql_tempdir }}/tempdb3.ndf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev4, FILENAME = '{{ mssql_tempdir }}/tempdb4.ndf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev5, FILENAME = '{{ mssql_tempdir }}/tempdb5.ndf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev6, FILENAME = '{{ mssql_tempdir }}/tempdb6.ndf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev7, FILENAME = '{{ mssql_tempdir }}/tempdb7.ndf');
+        ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev8, FILENAME = '{{ mssql_tempdir }}/tempdb8.ndf');
+        "
+      changed_when: true
+
+    - name: Reset systemd rate limiter before final restart
+      ansible.builtin.command: systemctl reset-failed mssql-server
+      changed_when: false
+      failed_when: false
+
+    - name: Brief pause before final restart
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Final restart to apply TempDB relocation
+      ansible.builtin.systemd:
+        name: mssql-server
+        state: restarted
+
+    - name: Wait for SQL Server after final restart
+      ansible.builtin.wait_for:
+        port: "{{ mssql_tcp_port }}"
+        host: localhost
+        delay: 5
+        timeout: 120
+
+
+
+
+    - name: Validate strict TempDB configuration
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C -h -1 -W -s ","
+        -Q "
+        SET NOCOUNT ON;
+        SELECT 
+            SUM(CASE WHEN type_desc = 'ROWS' THEN 1 ELSE 0 END) AS filecount_rows,
+            SUM(CASE WHEN type_desc = 'ROWS' AND size = 65536 THEN 1 ELSE 0 END) AS count_size_512mb,
+            SUM(CASE WHEN type_desc = 'ROWS' AND growth = 32768 THEN 1 ELSE 0 END) AS count_growth_256mb,
+            SUM(CASE WHEN type_desc = 'ROWS' AND is_percent_growth = 1 THEN 1 ELSE 0 END) AS count_percent_growth,
+            SUM(CASE WHEN type_desc = 'ROWS' AND physical_name LIKE '/mnt/sqltempdb/%' THEN 1 ELSE 0 END) AS count_path_ok_rows,
+            SUM(CASE WHEN type_desc = 'LOG' AND physical_name LIKE '/mnt/sqltempdb/%' THEN 1 ELSE 0 END) AS count_path_ok_log,
+            SUM(CASE WHEN type_desc = 'LOG' AND size = 65536 THEN 1 ELSE 0 END) AS count_log_size_512mb,
+            SUM(CASE WHEN type_desc = 'LOG' AND growth = 32768 THEN 1 ELSE 0 END) AS count_log_growth_256mb,
+            SUM(CASE WHEN type_desc = 'LOG' AND is_percent_growth = 1 THEN 1 ELSE 0 END) AS count_log_percent_growth
+        FROM master.sys.master_files
+        WHERE database_id = 2;
+        "
+      register: tempdb_validation
+      changed_when: false
+
+    - name: Set TempDB validation facts
+      ansible.builtin.set_fact:
+        tempdb_vals: "{{ (tempdb_validation.stdout | trim).split(',') }}"
+
+    - name: Assert TempDB strict configuration
+      ansible.builtin.assert:
+        that:
+          - tempdb_vals[0] | trim == '8'
+          - tempdb_vals[1] | trim == '8'
+          - tempdb_vals[2] | trim == '8'
+          - tempdb_vals[3] | trim == '0'
+          - tempdb_vals[4] | trim == '8'
+          - tempdb_vals[5] | trim == '1'
+          - tempdb_vals[6] | trim == '1'
+          - tempdb_vals[7] | trim == '1'
+          - tempdb_vals[8] | trim == '0'
+        fail_msg: "TempDB strict validation failed! Output: {{ tempdb_validation.stdout }}"
+
+    - name: Verify TempDB files location
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C -W
+        -Q "SELECT name, physical_name FROM sys.master_files WHERE database_id = 2 ORDER BY name"
+      register: tempdb_verify
+      changed_when: false
+
+    - name: Show TempDB file locations
+      ansible.builtin.debug:
+        var: tempdb_verify.stdout_lines
+
+    - name: Verify trace flags
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C -W
+        -Q "DBCC TRACESTATUS(-1)"
+      register: traceflags
+      changed_when: false
+
+    - name: Show trace flags
+      ansible.builtin.debug:
+        var: traceflags.stdout_lines
+
+    - name: Test SQL Server connectivity
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "SELECT @@VERSION AS [SQL Server Version]"
+      register: sql_version
+      changed_when: false
+      failed_when: false
+
+    - name: Warn if SQL Server connectivity test failed
+      ansible.builtin.debug:
+        msg: "WARNING: SQL Server connectivity test failed (rc={{ sql_version.rc }}). stderr: {{ sql_version.stderr | default('') }}"
+      when: sql_version.rc != 0
+
+    - name: Show SQL Server version
+      ansible.builtin.debug:
+        var: sql_version.stdout_lines
+      when: sql_version.rc == 0
+
+    - name: Verify sp_configure settings
+      ansible.builtin.command: >
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '{{ mssql_password }}' -C
+        -Q "
+        SELECT name, CAST(value_in_use AS INT) as value_in_use
+        FROM sys.configurations
+        WHERE name IN (
+          'max degree of parallelism',
+          'max server memory (MB)',
+          'min server memory (MB)',
+          'optimize for ad hoc workloads',
+          'cost threshold for parallelism'
+        )
+        ORDER BY name
+        "
+      register: sp_config
+      changed_when: false
+      failed_when: false
+
+    - name: Warn if sp_configure settings check failed
+      ansible.builtin.debug:
+        msg: "WARNING: sp_configure verification failed (rc={{ sp_config.rc }}). Error: {{ sp_config.stderr | default(sp_config.stdout) | default('unknown') }}"
+      when: sp_config.rc != 0
+
+    - name: Show sp_configure
+      ansible.builtin.debug:
+        var: sp_config.stdout_lines
+      when: sp_config.rc == 0
+
+    - name: Verify THP is disabled
+      ansible.builtin.command: cat /sys/kernel/mm/transparent_hugepage/enabled
+      register: thp_status
+      changed_when: false
+
+    - name: Verify disk mounts
+      ansible.builtin.shell: mount | grep mnt/sql || true
+      register: mount_status
+      changed_when: false
+
+    - name: Show installation summary
+      ansible.builtin.debug:
+        msg: |
+          SQL Server 2025 Developer - Installation Complete
+          ─────────────────────────────────────────────────
+          Data dir:    {{ mssql_datadir }}
+          Log dir:     {{ mssql_logdir }}
+          TempDB dir:  {{ mssql_tempdir }} (8 files x 512 MB, NVMe local)
+          TCP Port:    {{ mssql_tcp_port }}
+          ─────────────────────────────────────────────────
+          MAXDOP:                  8
+          Max Server Memory:       51200 MB
+          Min Server Memory:       0 MB
+          Optimize Ad Hoc:         ON
+          Cost Threshold Parallel: 50
+          ─────────────────────────────────────────────────
+          Lock Pages in Memory:    ON (traceflag 834)
+          Compressed Memory:       ON (traceflag 876)
+          fdatasync:               ON (traceflag 3979)
+          Alternate WriteThrough:  ON (control.alternatewritethrough)
+          WriteThrough:            ON (control.writethrough)
+          ─────────────────────────────────────────────────
+          NVMe TempDB Service:     Enabled (setup-sqltempdb.service)
+          THP:                     {{ thp_status.stdout }}
+          XFS Mount Options:       noatime,nodiratime,logbsize=256k
+          ─────────────────────────────────────────────────
+          Mounts:
+          {{ mount_status.stdout }}
+          SQL Agent:               Enabled
+          FTS:                     Enabled
+          Collation:               SQL_Latin1_General_CP1_CI_AS

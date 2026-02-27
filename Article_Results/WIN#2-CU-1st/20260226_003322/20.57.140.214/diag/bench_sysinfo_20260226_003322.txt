@@ -1,0 +1,69 @@
+=== uname ===
+Linux VMENDPOINT 6.12.0-124.39.1.el10_1.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Feb 17 19:13:15 EST 2026 x86_64 GNU/Linux
+=== uptime ===
+ 03:33:28 up 36 min,  2 users,  load average: 0.01, 0.07, 0.03
+=== cpu ===
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           48 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  4
+On-line CPU(s) list:                     0-3
+Vendor ID:                               AuthenticAMD
+BIOS Vendor ID:                          Advanced Micro Devices, Inc.
+Model name:                              AMD EPYC 9V45 96-Core Processor
+BIOS Model name:                         AMD EPYC 9V45 96-Core Processor                 None CPU @ 2.6GHz
+BIOS CPU family:                         107
+CPU family:                              26
+Model:                                   2
+Thread(s) per core:                      2
+Core(s) per socket:                      2
+Socket(s):                               1
+Stepping:                                1
+BogoMIPS:                                5192.24
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx_vnni avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm avx512_vp2intersect
+Virtualization:                          AMD-V
+Hypervisor vendor:                       Microsoft
+Virtualization type:                     full
+L1d cache:                               96 KiB (2 instances)
+L1i cache:                               64 KiB (2 instances)
+L2 cache:                                2 MiB (2 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-3
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+=== mem ===
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       1.0Gi        13Gi        46Mi       1.2Gi        14Gi
+Swap:             0B          0B          0B
+=== disk ===
+NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sr0                11:0    1 1024M  0 rom  
+nvme0n1           259:0    0  128G  0 disk 
+├─nvme0n1p1       259:1    0  500M  0 part /boot/efi
+├─nvme0n1p2       259:2    0    1G  0 part /boot
+├─nvme0n1p3       259:3    0    2M  0 part 
+└─nvme0n1p4       259:4    0 62.5G  0 part 
+  ├─rootvg-homelv 253:0    0    1G  0 lvm  /home
+  ├─rootvg-rootlv 253:1    0    2G  0 lvm  /
+  ├─rootvg-tmplv  253:2    0    2G  0 lvm  /tmp
+  ├─rootvg-usrlv  253:3    0   10G  0 lvm  /usr
+  └─rootvg-varlv  253:4    0   10G  0 lvm  /var
+nvme1n1           259:5    0  220G  0 disk 
+=== df ===
+Filesystem                 Size  Used Avail Use% Mounted on
+/dev/mapper/rootvg-rootlv  2.0G  110M  1.9G   6% /
+/dev/mapper/rootvg-usrlv    10G  2.5G  7.5G  25% /usr
+devtmpfs                   7.7G     0  7.7G   0% /dev
+tmpfs                      7.7G     0  7.7G   0% /dev/shm
+tmpfs                      3.1G   18M  3.1G   1% /run
+tmpfs                      1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
+/dev/mapper/rootvg-homelv  960M  220M  741M  23% /home
+/dev/nvme0n1p2             960M  318M  643M  34% /boot
+/dev/mapper/rootvg-tmplv   2.0G   71M  1.9G   4% /tmp
+/dev/mapper/rootvg-varlv    10G  325M  9.7G   4% /var
+/dev/nvme0n1p1             500M  8.8M  491M   2% /boot/efi
+tmpfs                      1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
+tmpfs                      1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
+tmpfs                      1.6G  4.0K  1.6G   1% /run/user/1000

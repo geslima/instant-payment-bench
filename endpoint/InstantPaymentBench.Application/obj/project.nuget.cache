@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "iH5R1WV7p60=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\gessi\\Projetos\\bench\\endpoint\\InstantPaymentBench.Application\\InstantPaymentBench.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\gessi\\.nuget\\packages\\dapper\\2.1.66\\dapper.2.1.66.nupkg.sha512"
+  ],
+  "logs": []
+}
